@@ -10,6 +10,11 @@ using System.Runtime.InteropServices;
 public static class RecordNative {
   [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hwnd);
   [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+  [StructLayout(LayoutKind.Sequential)] public struct Rect { public int Left, Top, Right, Bottom; }
+  [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hwnd, out Rect rect);
+  [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr hwnd, IntPtr after, int x, int y, int width, int height, uint flags);
+  [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
+  [DllImport("user32.dll")] public static extern void mouse_event(uint flags, uint x, uint y, uint data, UIntPtr extra);
 }
 '@
 $ExePath = (Resolve-Path $ExePath).Path
@@ -50,16 +55,27 @@ function Window-Named([string]$Name) {
 function Start-App {
     $script:app = Start-Process $ExePath -ArgumentList @('--settings-dir', ('"' + $settingsDirectory + '"')) -PassThru
     $script:main = Window-Named 'B01 Timer'
-    [RecordNative]::SetForegroundWindow([IntPtr]$script:main.Current.NativeWindowHandle) | Out-Null
+    Focus-Window ([IntPtr]$script:main.Current.NativeWindowHandle)
 }
 function Stop-App {
     if ($null -ne $script:app) { $script:app.CloseMainWindow() | Out-Null; if (-not $script:app.WaitForExit(5000)) { $script:app.Kill() }; $script:app.Dispose(); $script:app = $null }
 }
+function Focus-Window([IntPtr]$Handle) {
+    # Foreground lock can reject a background script's SetForegroundWindow.
+    # Bring the target into view without activation, then click its title bar.
+    [RecordNative]::SetWindowPos($Handle, [IntPtr](-1), 0, 0, 0, 0, 0x13) | Out-Null
+    try {
+        $rect = [RecordNative+Rect]::new()
+        [RecordNative]::GetWindowRect($Handle, [ref]$rect) | Out-Null
+        [RecordNative]::SetCursorPos($rect.Left + 60, $rect.Top + 16) | Out-Null
+        [RecordNative]::mouse_event(2, 0, 0, 0, [UIntPtr]::Zero)
+        [RecordNative]::mouse_event(4, 0, 0, 0, [UIntPtr]::Zero)
+        Wait-For { [RecordNative]::GetForegroundWindow() -eq $Handle } | Out-Null
+    } finally { [RecordNative]::SetWindowPos($Handle, [IntPtr](-2), 0, 0, 0, 0, 0x13) | Out-Null }
+}
 function Focus-Probe([int]$Index) {
     $probes[$Index].Refresh()
-    $handle = $probes[$Index].MainWindowHandle
-    [RecordNative]::SetForegroundWindow($handle) | Out-Null
-    Wait-For { [RecordNative]::GetForegroundWindow() -eq $handle } | Out-Null
+    Focus-Window $probes[$Index].MainWindowHandle
 }
 function Display-Time {
     return "$( (Control 'RecordHours').Current.Name ):$( (Control 'RecordMinutes').Current.Name ):$( (Control 'RecordSeconds').Current.Name )"
@@ -85,7 +101,7 @@ function Add-Record([int]$Index, [string]$Title) {
     Check ((Control ('RecordChip_' + ($Index - 1))).Current.Name -eq $Title) "Record $Index uses its user title"
 }
 function Screenshot([string]$Name) {
-    [RecordNative]::SetForegroundWindow([IntPtr]$script:main.Current.NativeWindowHandle) | Out-Null
+    Focus-Window ([IntPtr]$script:main.Current.NativeWindowHandle)
     Start-Sleep -Milliseconds 150
     $rect = $script:main.Current.BoundingRectangle
     $bmp = [Drawing.Bitmap]::new([int]$rect.Width, [int]$rect.Height); $graphics = [Drawing.Graphics]::FromImage($bmp)
@@ -126,19 +142,19 @@ public static class RecordProbe {
     Invoke 'RecordChip_1'
     Wait-For { (Display-Time) -ne '00:00:00' } | Out-Null
     Check ((Display-Time) -ne '00:00:00') 'Unselected registered program continues to accrue time'
-    [RecordNative]::SetForegroundWindow([IntPtr]$main.Current.NativeWindowHandle) | Out-Null
+    Focus-Window ([IntPtr]$main.Current.NativeWindowHandle)
     Start-Sleep -Milliseconds 300
     $paused = Display-Time; Start-Sleep -Milliseconds 1500
     Check ((Display-Time) -eq $paused) 'Own app focus excludes time'
     Focus-Probe 2; $unchanged = Display-Time; Start-Sleep -Milliseconds 1200
     Check ((Display-Time) -eq $unchanged) 'Unregistered program focus excludes time'
-    [RecordNative]::SetForegroundWindow([IntPtr]$main.Current.NativeWindowHandle) | Out-Null
+    Focus-Window ([IntPtr]$main.Current.NativeWindowHandle)
     Invoke 'ResetButton'
     Check ((Display-Time) -eq '00:00:00') 'Record reset returns the selected record to zero'
     Invoke 'RecordChip_0'; Check ((Display-Time) -ne '00:00:00') 'Reset retains other program totals'
     # Countdown continues while Record is displayed; records also run on Timer tab.
     Invoke 'TimerTab'
-    [RecordNative]::SetForegroundWindow([IntPtr]$main.Current.NativeWindowHandle) | Out-Null
+    Focus-Window ([IntPtr]$main.Current.NativeWindowHandle)
     $input = Control 'SecondsInput'; $input.SetFocus(); [Windows.Forms.SendKeys]::SendWait('^a30{ENTER}'); Invoke 'StartPauseButton'
     Invoke 'RecordTab'; $before = Record-Ticks 1; Focus-Probe 0; Start-Sleep -Milliseconds 1500
     Invoke 'TimerTab'
@@ -156,7 +172,7 @@ public static class RecordProbe {
     Wait-For { $probes[1].Refresh(); $probes[1].MainWindowHandle -ne [IntPtr]::Zero } | Out-Null
     Focus-Probe 1; Wait-For { (Record-Ticks 2) -gt $savedB } 6000 | Out-Null
     Check ((Record-Ticks 2) -gt $savedB) 'Restarted target program matches its persisted executable'
-    [RecordNative]::SetForegroundWindow([IntPtr]$main.Current.NativeWindowHandle) | Out-Null
+    Focus-Window ([IntPtr]$main.Current.NativeWindowHandle)
     Add-Record 3 'Work C'; Add-Record 4 'Work D'; Add-Record 5 'Work E'
     Check (-not (Control 'AddRecordButton').Current.IsEnabled) 'Five programs disables further registration'
     Screenshot 'record-five-programs'
