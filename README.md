@@ -26,4 +26,10 @@ The release version comes from `InformationalVersion` in `src/B01Timer/B01Timer.
 
 The UI uses WPF and per-monitor DPI scaling. Countdown timing uses a monotonic clock and is independent from UI updates. Settings use readable INI sections and hh:mm:ss values, written through an atomic file replacement.
 
-The source code uses the [MIT license](LICENSE). Outline icons come from [Reicon](https://reicon.dev/icons?weight=outline); their license notices are included in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt). Design specifications are in [docs/design-spec.md](docs/design-spec.md).
+The source code uses the [MIT license](LICENSE). Outline icons come from [Reicon](https://reicon.dev/icons?weight=outline); their license notices are included in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt). Design specifications are in [docs/design-spec.md](docs/design-spec.md), and verified delivery results are in [docs/qa-report.md](docs/qa-report.md).
+
+## Editable design guide
+
+The [Figma style guide](https://www.figma.com/design/F3jN688KWp9JsFV7JSqPs7) contains color variables, typography, vector icons and reusable components with interaction states for both themes. [docs/figma-style-guide.md](docs/figma-style-guide.md) records its verified scope and limitations; [docs/figma-design-map.json](docs/figma-design-map.json) maps the actual Figma IDs to the source files. Figma preview fonts use Inter and Roboto Mono because Segoe UI and Consolas were unavailable in the connected editor; the Windows app retains Segoe UI and Consolas.
+
+For a later design update, edit the relevant Figma variables or component variants and request implementation using the file or node link. The mapping lets the developer inspect the current Figma values and apply them to the corresponding WPF resources and controls. Edits are applied through an implementation request, with Windows verification before a new release.

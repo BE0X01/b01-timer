@@ -1,0 +1,3010 @@
+{
+  "schemaVersion": 1,
+  "fileKey": "F3jN688KWp9JsFV7JSqPs7",
+  "fileUrl": "https://www.figma.com/design/F3jN688KWp9JsFV7JSqPs7",
+  "team": "Project",
+  "baselineCommit": "a39ebf1",
+  "sourceRepository": "https://github.com/BE0X01/b01-timer",
+  "scope": "Source-derived editable style guide",
+  "status": "Foundations and component states completed; composed views and full flows blocked by Figma Starter MCP rate limit",
+  "pages": {
+    "01 Foundations": "0:1",
+    "02 Components": "4:2",
+    "03 Interactions": "4:3"
+  },
+  "reviewFrames": {
+    "foundations": "6:2",
+    "components": "10:23"
+  },
+  "sourceFiles": [
+    "src/B01Timer/ThemeManager.cs",
+    "src/B01Timer/Styles.xaml",
+    "src/B01Timer/Icons.xaml",
+    "src/B01Timer/DurationEditor.xaml",
+    "src/B01Timer/DurationEditor.xaml.cs",
+    "src/B01Timer/MainWindow.xaml",
+    "src/B01Timer/MainWindow.xaml.cs",
+    "src/B01Timer/PresetWindow.xaml",
+    "src/B01Timer/PresetWindow.xaml.cs"
+  ],
+  "themeStrategy": {
+    "type": "separate-collections",
+    "reason": [
+      "Error: in addMode: Limited to 1 modes only"
+    ],
+    "collections": {
+      "primitives": {
+        "id": "VariableCollectionId:4:4",
+        "key": "a2b225314b1b27fc3ebf23d4b60cc598ce12a245",
+        "modes": {
+          "Value": "4:0"
+        }
+      },
+      "color": {
+        "id": "VariableCollectionId:4:5",
+        "key": "3e87a363e7834c9f444b735a59df57c299654055",
+        "modes": {
+          "Dark": "4:1"
+        }
+      },
+      "lightColor": {
+        "id": "VariableCollectionId:4:6",
+        "key": "b0a4b863df73408cb2f495356b9a38ad3e4c381b",
+        "modes": {
+          "Light": "4:2"
+        }
+      },
+      "metrics": {
+        "id": "VariableCollectionId:4:7",
+        "key": "54a0ba6afc6302cbf472dd0ad31c297c8150d1d6",
+        "modes": {
+          "Value": "4:3"
+        }
+      }
+    }
+  },
+  "variables": {
+    "primitiveColors": {
+      "Dark/Window": {
+        "id": "VariableID:4:8",
+        "key": "f67bfac3202517fc88658509ded2b7d71dfd25aa",
+        "hex": "#181C1F"
+      },
+      "Light/Window": {
+        "id": "VariableID:4:9",
+        "key": "946ca549eadd92401f9ca96b4369792d81069074",
+        "hex": "#F7F8F5"
+      },
+      "Dark/Surface": {
+        "id": "VariableID:4:12",
+        "key": "df11d46656af2ea3ea672b4c62551161a216952e",
+        "hex": "#20262A"
+      },
+      "Light/Surface": {
+        "id": "VariableID:4:13",
+        "key": "e93eab0b453eea78dd8fb9866243e362858d045e",
+        "hex": "#FFFFFF"
+      },
+      "Dark/Raised": {
+        "id": "VariableID:4:16",
+        "key": "fbe311354b3e96ccb7aa8b9ff165ae26fc7c84bc",
+        "hex": "#282F33"
+      },
+      "Light/Raised": {
+        "id": "VariableID:4:17",
+        "key": "f266aca47b7a6bccdcdb19c51eb59444909fee14",
+        "hex": "#EDEFEA"
+      },
+      "Dark/Hover": {
+        "id": "VariableID:4:20",
+        "key": "3df5a99507724f6cd7447b3b3270d831beacf100",
+        "hex": "#333D42"
+      },
+      "Light/Hover": {
+        "id": "VariableID:4:21",
+        "key": "2396a16ec576b46d7cf314fe9469982cf78a068d",
+        "hex": "#E3E8E1"
+      },
+      "Dark/Border": {
+        "id": "VariableID:4:24",
+        "key": "bceb501cf4cf2e88d89c8642d04367cfb3ac389d",
+        "hex": "#353E43"
+      },
+      "Light/Border": {
+        "id": "VariableID:4:25",
+        "key": "1f169be67d3053104be471a30cc5856d90422ea8",
+        "hex": "#DDE2DA"
+      },
+      "Dark/Text": {
+        "id": "VariableID:4:28",
+        "key": "350b0cd7dcb0446ab4f9ea14947a91e7c9bb6ce8",
+        "hex": "#F1F4EF"
+      },
+      "Light/Text": {
+        "id": "VariableID:4:29",
+        "key": "ab36a522e2b76f86246c1297dc3a4ad9fec8327b",
+        "hex": "#202923"
+      },
+      "Dark/Muted": {
+        "id": "VariableID:4:32",
+        "key": "615d4b9d46ae721bd6802766dec936e4e75367d2",
+        "hex": "#A5B1AA"
+      },
+      "Light/Muted": {
+        "id": "VariableID:4:33",
+        "key": "703eba421743c891ba91acc91b4fe47330a112f4",
+        "hex": "#64716A"
+      },
+      "Dark/Disabled": {
+        "id": "VariableID:4:36",
+        "key": "35888d71b4033abd3e622a0c5f436ae3cc623fbc",
+        "hex": "#68736D"
+      },
+      "Light/Disabled": {
+        "id": "VariableID:4:37",
+        "key": "c57079fdbd6ca2573063ddc29a5ac20fa48439af",
+        "hex": "#9AA59E"
+      },
+      "Dark/Accent": {
+        "id": "VariableID:4:40",
+        "key": "0bf46616bab196c9b0628b9ef073c1d8bebd7ac0",
+        "hex": "#A9CDBA"
+      },
+      "Light/Accent": {
+        "id": "VariableID:4:41",
+        "key": "0c2587cd7fb70ec6aa65e620e0678d4eed383ddd",
+        "hex": "#27624F"
+      },
+      "Dark/AccentForeground": {
+        "id": "VariableID:4:44",
+        "key": "9cf0b71ae0f5ffbcb6012d56a9e064cfcb37f2b1",
+        "hex": "#1C3328"
+      },
+      "Light/AccentForeground": {
+        "id": "VariableID:4:45",
+        "key": "6e539790698e7f0d1c29842cfd2095f3d3547583",
+        "hex": "#FFFFFF"
+      },
+      "Dark/AccentHover": {
+        "id": "VariableID:4:48",
+        "key": "e63cfb6604bccf651c7c331061211d11510a0f7c",
+        "hex": "#BDDCCB"
+      },
+      "Light/AccentHover": {
+        "id": "VariableID:4:49",
+        "key": "721cb640d127b3f879f4b8459fafe0d11b84512b",
+        "hex": "#1E503F"
+      },
+      "Dark/Selected": {
+        "id": "VariableID:4:52",
+        "key": "a7187ddd66c256b9ed5b215bf66375ce2bf42c46",
+        "hex": "#2F4439"
+      },
+      "Light/Selected": {
+        "id": "VariableID:4:53",
+        "key": "88a07f3b811d16026a21e21abb788b0d746aac8b",
+        "hex": "#DCEBE1"
+      },
+      "Dark/Error": {
+        "id": "VariableID:4:56",
+        "key": "e06c6f4809cf1e861d395c3fb071931dfd84a451",
+        "hex": "#F3A8A3"
+      },
+      "Light/Error": {
+        "id": "VariableID:4:57",
+        "key": "56a9eb2134e77ba22e450d0da607faab7a6f3640",
+        "hex": "#AF3C37"
+      }
+    },
+    "semanticColors": {
+      "Dark": {
+        "Window": {
+          "id": "VariableID:4:10",
+          "key": "843f5316e8c37010a9c87dc8e7e8d9297daedbca",
+          "wpfResource": "WindowBrush"
+        },
+        "Surface": {
+          "id": "VariableID:4:14",
+          "key": "89767805f63d1fdab802384adff289990dd115d4",
+          "wpfResource": "SurfaceBrush"
+        },
+        "Raised": {
+          "id": "VariableID:4:18",
+          "key": "72e189b4cdbd5528902c3b7c484c023981057fce",
+          "wpfResource": "RaisedBrush"
+        },
+        "Hover": {
+          "id": "VariableID:4:22",
+          "key": "a0c42563e8d0a71c37c4c56dc0bab1ae377a9fc0",
+          "wpfResource": "HoverBrush"
+        },
+        "Border": {
+          "id": "VariableID:4:26",
+          "key": "da365ac2ff5b808d9f11786bd9dfe632c322d8dd",
+          "wpfResource": "BorderBrush"
+        },
+        "Text": {
+          "id": "VariableID:4:30",
+          "key": "4d8d93a176a6e386b1b3c7d70739348db7d1f201",
+          "wpfResource": "TextBrush"
+        },
+        "Muted": {
+          "id": "VariableID:4:34",
+          "key": "3db9a0d4e6c55ba699f26dae8f9dec77b18b68c1",
+          "wpfResource": "MutedBrush"
+        },
+        "Disabled": {
+          "id": "VariableID:4:38",
+          "key": "ba107c3a795a53c66bdba2ae48fa4d3b18ae84d2",
+          "wpfResource": "DisabledBrush"
+        },
+        "Accent": {
+          "id": "VariableID:4:42",
+          "key": "c6b67bf9fe27fdf50859273718afa3ec21daa631",
+          "wpfResource": "AccentBrush"
+        },
+        "AccentForeground": {
+          "id": "VariableID:4:46",
+          "key": "6084da797db00e400c12a46ef6f2dc1ac21f418a",
+          "wpfResource": "AccentForegroundBrush"
+        },
+        "AccentHover": {
+          "id": "VariableID:4:50",
+          "key": "335f47e0a9622ebd725cd88c0b939dfce57edd29",
+          "wpfResource": "AccentHoverBrush"
+        },
+        "Selected": {
+          "id": "VariableID:4:54",
+          "key": "07ece068356c45686455ae01d62927da892d3959",
+          "wpfResource": "SelectedBrush"
+        },
+        "Error": {
+          "id": "VariableID:4:58",
+          "key": "2ea06bb5a8dca5faab1bff086ae446abbf9867b3",
+          "wpfResource": "ErrorBrush"
+        }
+      },
+      "Light": {
+        "Window": {
+          "id": "VariableID:4:11",
+          "key": "b6512a4f759a3d421e50c65e864f93ca80916872",
+          "wpfResource": "WindowBrush"
+        },
+        "Surface": {
+          "id": "VariableID:4:15",
+          "key": "24d19239d89b615a40adbfb01776217d6ae61161",
+          "wpfResource": "SurfaceBrush"
+        },
+        "Raised": {
+          "id": "VariableID:4:19",
+          "key": "e1f8b12d83aa4b601b7d3c0ee68d017574d6b502",
+          "wpfResource": "RaisedBrush"
+        },
+        "Hover": {
+          "id": "VariableID:4:23",
+          "key": "409efae86a31d71207a7b0fdec172224dde00722",
+          "wpfResource": "HoverBrush"
+        },
+        "Border": {
+          "id": "VariableID:4:27",
+          "key": "407cca838ed52cc743f5d65a661c3fd9b19e5268",
+          "wpfResource": "BorderBrush"
+        },
+        "Text": {
+          "id": "VariableID:4:31",
+          "key": "1098b7c30a806af2c1a504495d102b4aac9486f2",
+          "wpfResource": "TextBrush"
+        },
+        "Muted": {
+          "id": "VariableID:4:35",
+          "key": "2cc2d0374d83c4d5ad21a7675c3b1cabecbbba6a",
+          "wpfResource": "MutedBrush"
+        },
+        "Disabled": {
+          "id": "VariableID:4:39",
+          "key": "a3cdddd8e24a5a3ca958573192ac409fa3cbec61",
+          "wpfResource": "DisabledBrush"
+        },
+        "Accent": {
+          "id": "VariableID:4:43",
+          "key": "785e9213e687f8442bfdaff7c37b3e450bbcda9d",
+          "wpfResource": "AccentBrush"
+        },
+        "AccentForeground": {
+          "id": "VariableID:4:47",
+          "key": "4751502daa6e2ccfdc074f5f50a49de7be21c1c9",
+          "wpfResource": "AccentForegroundBrush"
+        },
+        "AccentHover": {
+          "id": "VariableID:4:51",
+          "key": "34436fb73ce9fa2fcc3e007dde57c451ae248720",
+          "wpfResource": "AccentHoverBrush"
+        },
+        "Selected": {
+          "id": "VariableID:4:55",
+          "key": "574163afb13731ef1c90b3419ff8b12a8e3f96d5",
+          "wpfResource": "SelectedBrush"
+        },
+        "Error": {
+          "id": "VariableID:4:59",
+          "key": "005b5c91134742e41babb96cb779ec74783abf71",
+          "wpfResource": "ErrorBrush"
+        }
+      }
+    },
+    "metrics": {
+      "radius/control": {
+        "id": "VariableID:4:60",
+        "key": "ca2fc8c71e56e56e7f319ac3fb75f501dad0f0a3",
+        "value": 12,
+        "source": "src/B01Timer/Styles.xaml"
+      },
+      "radius/focus": {
+        "id": "VariableID:4:61",
+        "key": "fcc87db4fe92980931c6ca7019eb902f7bec43fd",
+        "value": 10,
+        "source": "src/B01Timer/Styles.xaml"
+      },
+      "radius/input": {
+        "id": "VariableID:4:62",
+        "key": "b226da01ced70b743c8817720f6cfe2dc1a6ca3b",
+        "value": 8,
+        "source": "src/B01Timer/DurationEditor.xaml"
+      },
+      "radius/panel": {
+        "id": "VariableID:4:63",
+        "key": "fca9aec71403a8fd5953c38e58e118483cd9dd01",
+        "value": 16,
+        "source": "src/B01Timer/MainWindow.xaml"
+      },
+      "radius/menu-row": {
+        "id": "VariableID:4:64",
+        "key": "af5a5741058b654db297a1ee731a9edadf365a1b",
+        "value": 6,
+        "source": "src/B01Timer/Styles.xaml"
+      },
+      "stroke/border": {
+        "id": "VariableID:4:65",
+        "key": "c5584cc35de0506722762366217fa45a24e77d5f",
+        "value": 1,
+        "source": "src/B01Timer/MainWindow.xaml"
+      },
+      "stroke/focus": {
+        "id": "VariableID:4:66",
+        "key": "1161cc198c935632cc4e67cad8c7657940fca9f5",
+        "value": 2,
+        "source": "src/B01Timer/Styles.xaml"
+      },
+      "space/control-x": {
+        "id": "VariableID:4:67",
+        "key": "59171b609175d3445fb92ccb9ef685056314c85d",
+        "value": 12,
+        "source": "src/B01Timer/Styles.xaml"
+      },
+      "space/chip-gap": {
+        "id": "VariableID:4:68",
+        "key": "47461a14c863fc0f8b56a909fcf9209d768dda7c",
+        "value": 8,
+        "source": "src/B01Timer/MainWindow.xaml.cs"
+      },
+      "space/actions-gap": {
+        "id": "VariableID:4:69",
+        "key": "895b0c89be74820adb6db1d9775bb49b0d50c897",
+        "value": 10,
+        "source": "src/B01Timer/MainWindow.xaml"
+      },
+      "space/focus-inset": {
+        "id": "VariableID:4:70",
+        "key": "398409c905cafddb999068a5f7674b3022d34e50",
+        "value": 2,
+        "source": "src/B01Timer/Styles.xaml"
+      },
+      "space/page": {
+        "id": "VariableID:4:71",
+        "key": "f20654ed142a7c790c35a064eeec4657f90cb306",
+        "value": 24,
+        "source": "src/B01Timer/MainWindow.xaml"
+      },
+      "space/header-to-chips": {
+        "id": "VariableID:4:72",
+        "key": "7a05999ee92c327c6d1d1e92f6d0b2a6b6b1deb4",
+        "value": 16,
+        "source": "src/B01Timer/MainWindow.xaml"
+      },
+      "space/chips-to-panel": {
+        "id": "VariableID:4:73",
+        "key": "0b8e1cdb5760492fb9cfe320e0c446ca7e10a282",
+        "value": 20,
+        "source": "src/B01Timer/MainWindow.xaml"
+      },
+      "opacity/pressed": {
+        "id": "VariableID:4:74",
+        "key": "a5f88691dc9f3a7c99a297fc695bc5ccca5ef613",
+        "value": 80,
+        "source": "src/B01Timer/Styles.xaml",
+        "wpfValue": 0.8,
+        "unit": "percent"
+      },
+      "opacity/disabled-neutral": {
+        "id": "VariableID:4:75",
+        "key": "37d4e1097c3beeef0ee85663e75d96ae66504c38",
+        "value": 45,
+        "source": "src/B01Timer/Styles.xaml",
+        "wpfValue": 0.45,
+        "unit": "percent"
+      },
+      "opacity/disabled-accent": {
+        "id": "VariableID:4:76",
+        "key": "968cf61b39fed3fe6441c8b58b5eddf9f00d59f9",
+        "value": 40,
+        "source": "src/B01Timer/Styles.xaml",
+        "wpfValue": 0.4,
+        "unit": "percent"
+      },
+      "opacity/input-selection": {
+        "id": "VariableID:4:77",
+        "key": "c5a1d587033ba688ba7a9306f46706f01169cdb1",
+        "value": 50,
+        "source": "src/B01Timer/DurationEditor.xaml",
+        "wpfValue": 0.5,
+        "unit": "percent"
+      }
+    }
+  },
+  "textStyles": {
+    "ui/title": {
+      "id": "S:e1adb02e4372efc808e79fad02809eb0196a20a5,",
+      "key": "e1adb02e4372efc808e79fad02809eb0196a20a5",
+      "fontName": {
+        "family": "Inter",
+        "style": "Semi Bold"
+      },
+      "fontSize": 12,
+      "source": "Segoe UI SemiBold; MainWindow title"
+    },
+    "ui/body": {
+      "id": "S:d66653996d8632c503eb82321d606f9a43074a78,",
+      "key": "d66653996d8632c503eb82321d606f9a43074a78",
+      "fontName": {
+        "family": "Inter",
+        "style": "Regular"
+      },
+      "fontSize": 12,
+      "source": "Segoe UI Regular; status, helper, menu"
+    },
+    "ui/control": {
+      "id": "S:98b47cf05fc6f79a44f4a13b78ef4ce99dd984c7,",
+      "key": "98b47cf05fc6f79a44f4a13b78ef4ce99dd984c7",
+      "fontName": {
+        "family": "Inter",
+        "style": "Semi Bold"
+      },
+      "fontSize": 12,
+      "source": "Segoe UI SemiBold; ButtonBase"
+    },
+    "ui/tab": {
+      "id": "S:0875b3299959524e0c8e3325db67b296b39888f3,",
+      "key": "0875b3299959524e0c8e3325db67b296b39888f3",
+      "fontName": {
+        "family": "Inter",
+        "style": "Semi Bold"
+      },
+      "fontSize": 13,
+      "source": "Segoe UI SemiBold; tabs"
+    },
+    "ui/heading": {
+      "id": "S:c04fa586d5f9747615862208351d7e248a075aba,",
+      "key": "c04fa586d5f9747615862208351d7e248a075aba",
+      "fontName": {
+        "family": "Inter",
+        "style": "Semi Bold"
+      },
+      "fontSize": 18,
+      "source": "Segoe UI SemiBold; PresetWindow heading"
+    },
+    "ui/label": {
+      "id": "S:ee89f189ee58b84915e3f8c8f1a9bfc1210795d8,",
+      "key": "ee89f189ee58b84915e3f8c8f1a9bfc1210795d8",
+      "fontName": {
+        "family": "Inter",
+        "style": "Regular"
+      },
+      "fontSize": 9,
+      "source": "Segoe UI Regular; DurationEditor labels"
+    },
+    "ui/error": {
+      "id": "S:616f6e514923a04ed3f2d33299a627e47632a17f,",
+      "key": "616f6e514923a04ed3f2d33299a627e47632a17f",
+      "fontName": {
+        "family": "Inter",
+        "style": "Regular"
+      },
+      "fontSize": 11,
+      "source": "Segoe UI Regular; PresetWindow ErrorText"
+    },
+    "timer/main": {
+      "id": "S:0a75ea31009a6c24a31aaca48938543cf211165c,",
+      "key": "0a75ea31009a6c24a31aaca48938543cf211165c",
+      "fontName": {
+        "family": "Roboto Mono",
+        "style": "Regular"
+      },
+      "fontSize": 60,
+      "source": "Consolas Regular; NumberSize=60"
+    },
+    "timer/dialog": {
+      "id": "S:866fb8f31095a47c41f7c4925e388e81213368cb,",
+      "key": "866fb8f31095a47c41f7c4925e388e81213368cb",
+      "fontName": {
+        "family": "Roboto Mono",
+        "style": "Regular"
+      },
+      "fontSize": 24,
+      "source": "Consolas Regular; NumberSize=24"
+    },
+    "guide/title": {
+      "id": "S:d70dc55e8824265e5b9cdcf56dba2e467d825e8f,",
+      "key": "d70dc55e8824265e5b9cdcf56dba2e467d825e8f",
+      "fontName": {
+        "family": "Noto Sans KR",
+        "style": "Bold"
+      },
+      "fontSize": 28,
+      "source": "Documentation only"
+    },
+    "guide/body": {
+      "id": "S:1207b9e6bed42dbf7b88636bf76513b26efa606d,",
+      "key": "1207b9e6bed42dbf7b88636bf76513b26efa606d",
+      "fontName": {
+        "family": "Noto Sans KR",
+        "style": "Regular"
+      },
+      "fontSize": 13,
+      "source": "Documentation only"
+    }
+  },
+  "fontMapping": {
+    "source": {
+      "ui": "Segoe UI",
+      "timer": "Consolas"
+    },
+    "figma": {
+      "ui": "Inter",
+      "timer": "Roboto Mono",
+      "documentation": "Noto Sans KR"
+    },
+    "sourceFontAvailability": "Checked with listAvailableFontsAsync: source fonts absent",
+    "windowsAppFontsChanged": false
+  },
+  "glyphs": {
+    "IconPlay": {
+      "id": "8:145",
+      "key": "0d9b4d518924041ddb685a982963669af36c992a",
+      "name": "Glyph/IconPlay",
+      "source": "src/B01Timer/Icons.xaml"
+    },
+    "IconPause": {
+      "id": "8:153",
+      "key": "ef7439be0b0f63ca74e2a73f5d0c42db39cc25e1",
+      "name": "Glyph/IconPause",
+      "source": "src/B01Timer/Icons.xaml"
+    },
+    "IconRestart": {
+      "id": "8:161",
+      "key": "afc7a25982a2b867c75381abcbdd40e1a9fa1500",
+      "name": "Glyph/IconRestart",
+      "source": "src/B01Timer/Icons.xaml"
+    },
+    "IconAdd": {
+      "id": "8:169",
+      "key": "dd5481fdfcaa29c9ee6c6f4e9b9129599a1acded",
+      "name": "Glyph/IconAdd",
+      "source": "src/B01Timer/Icons.xaml"
+    },
+    "IconSun": {
+      "id": "8:177",
+      "key": "f48398351791da3ff5ab9282d182918bc2ba3ad8",
+      "name": "Glyph/IconSun",
+      "source": "src/B01Timer/Icons.xaml"
+    },
+    "IconMoon": {
+      "id": "8:185",
+      "key": "03972ca841e8202561195e26bc146c4a1e63f8c4",
+      "name": "Glyph/IconMoon",
+      "source": "src/B01Timer/Icons.xaml"
+    },
+    "WindowClose": {
+      "id": "8:193",
+      "key": "fd6bdab8d089910e84ad0e29a70a0dc1094df69e",
+      "name": "Glyph/WindowClose",
+      "source": "src/B01Timer/MainWindow.xaml"
+    },
+    "WindowMinimize": {
+      "id": "8:201",
+      "key": "b392599ddc4e2343dc7bde18438b7b7ba194fbb4",
+      "name": "Glyph/WindowMinimize",
+      "source": "src/B01Timer/MainWindow.xaml"
+    },
+    "WindowMaximize": {
+      "id": "8:209",
+      "key": "c07d629b733cc329695851b938d04ef3bd85f775",
+      "name": "Glyph/WindowMaximize",
+      "source": "src/B01Timer/MainWindow.xaml"
+    },
+    "AppTimer": {
+      "id": "8:217",
+      "key": "badd6f803aa4d89665296a31eeed0e29fac35042",
+      "name": "Glyph/AppTimer",
+      "source": "src/B01Timer/MainWindow.xaml"
+    }
+  },
+  "componentSets": {
+    "Button/Text": {
+      "name": "Button/Text",
+      "id": "11:89",
+      "key": "73cd2b3a4dc204537a40590a2233932ae09ae5f6",
+      "properties": {
+        "Label#11:21": {
+          "type": "TEXT",
+          "defaultValue": "Add"
+        },
+        "Theme": {
+          "type": "VARIANT",
+          "defaultValue": "Dark",
+          "variantOptions": [
+            "Dark",
+            "Light"
+          ]
+        },
+        "Kind": {
+          "type": "VARIANT",
+          "defaultValue": "Accent",
+          "variantOptions": [
+            "Accent",
+            "Neutral"
+          ]
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Default",
+          "variantOptions": [
+            "Default",
+            "Hover",
+            "Pressed",
+            "Focus",
+            "Disabled"
+          ]
+        }
+      },
+      "source": "Styles.xaml ButtonBase / AccentButton; PresetWindow Cancel, Add, Save",
+      "variants": {
+        "Theme=Dark, Kind=Accent, State=Default": {
+          "id": "11:69",
+          "key": "8d968344b1cfde0a611217866531ceda4332b612",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Accent",
+            "State": "Default"
+          }
+        },
+        "Theme=Dark, Kind=Accent, State=Hover": {
+          "id": "11:70",
+          "key": "389009c2f6658e43dedf2672a5c96e0cca603220",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Accent",
+            "State": "Hover"
+          }
+        },
+        "Theme=Dark, Kind=Accent, State=Pressed": {
+          "id": "11:71",
+          "key": "78f30aa6512bd7fa17385804727f53065a0f6fd2",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Accent",
+            "State": "Pressed"
+          }
+        },
+        "Theme=Dark, Kind=Accent, State=Focus": {
+          "id": "11:72",
+          "key": "94c5986ead3ebf94c01539ae1377779dd2fafbf8",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Accent",
+            "State": "Focus"
+          }
+        },
+        "Theme=Dark, Kind=Accent, State=Disabled": {
+          "id": "11:73",
+          "key": "45ebebf1e380efe7dd4987f3609a598de6a02cd7",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Accent",
+            "State": "Disabled"
+          }
+        },
+        "Theme=Dark, Kind=Neutral, State=Default": {
+          "id": "11:74",
+          "key": "a2d911e69eb1eb4e79b2e5ce0c77005c793f5f58",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Neutral",
+            "State": "Default"
+          }
+        },
+        "Theme=Dark, Kind=Neutral, State=Hover": {
+          "id": "11:75",
+          "key": "86bcf64f2546d9d4f4e8d0beeb5dc5ead05b78f0",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Neutral",
+            "State": "Hover"
+          }
+        },
+        "Theme=Dark, Kind=Neutral, State=Pressed": {
+          "id": "11:76",
+          "key": "abd5a52f6c76c4bf7a2ad21f3774ee1f78abb35a",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Neutral",
+            "State": "Pressed"
+          }
+        },
+        "Theme=Dark, Kind=Neutral, State=Focus": {
+          "id": "11:77",
+          "key": "d21c3185c187f869e5504a9b3e60fcb46112f81f",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Neutral",
+            "State": "Focus"
+          }
+        },
+        "Theme=Dark, Kind=Neutral, State=Disabled": {
+          "id": "11:78",
+          "key": "1cab3e85b5655c523e27a47425be5dd3d77a0270",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Neutral",
+            "State": "Disabled"
+          }
+        },
+        "Theme=Light, Kind=Accent, State=Default": {
+          "id": "11:79",
+          "key": "b70d6114e733eea0e05dd06b2a03c147dbe6637b",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Accent",
+            "State": "Default"
+          }
+        },
+        "Theme=Light, Kind=Accent, State=Hover": {
+          "id": "11:80",
+          "key": "4bd3b19b8f6fad6b15d7870740cf68f88b2c89a2",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Accent",
+            "State": "Hover"
+          }
+        },
+        "Theme=Light, Kind=Accent, State=Pressed": {
+          "id": "11:81",
+          "key": "4e219534a13f6df9a70b502299352025eaa7027c",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Accent",
+            "State": "Pressed"
+          }
+        },
+        "Theme=Light, Kind=Accent, State=Focus": {
+          "id": "11:82",
+          "key": "e8a95baf1b0a14c63500c734742affaecb9af7a8",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Accent",
+            "State": "Focus"
+          }
+        },
+        "Theme=Light, Kind=Accent, State=Disabled": {
+          "id": "11:83",
+          "key": "f7683e452963e8ec16005656b456ba6872f14a0f",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Accent",
+            "State": "Disabled"
+          }
+        },
+        "Theme=Light, Kind=Neutral, State=Default": {
+          "id": "11:84",
+          "key": "ed70e047582f1e7f4b8a768f26a8581c812f8c31",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Neutral",
+            "State": "Default"
+          }
+        },
+        "Theme=Light, Kind=Neutral, State=Hover": {
+          "id": "11:85",
+          "key": "e5b68ab625758750178965b81d1bfe874e68ca95",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Neutral",
+            "State": "Hover"
+          }
+        },
+        "Theme=Light, Kind=Neutral, State=Pressed": {
+          "id": "11:86",
+          "key": "be1e2e645e84094af7d2aee27fb1be650137a42c",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Neutral",
+            "State": "Pressed"
+          }
+        },
+        "Theme=Light, Kind=Neutral, State=Focus": {
+          "id": "11:87",
+          "key": "d4f811a64860c584142a6e890fd4d7d2ce6de4ee",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Neutral",
+            "State": "Focus"
+          }
+        },
+        "Theme=Light, Kind=Neutral, State=Disabled": {
+          "id": "11:88",
+          "key": "884b703e140a773195fff2419e214b8dd1012823",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Neutral",
+            "State": "Disabled"
+          }
+        }
+      }
+    },
+    "Button/Action": {
+      "name": "Button/Action",
+      "id": "11:154",
+      "key": "66c9d9aa87f5fb63cc64719c4b98752b5ca7bf8d",
+      "properties": {
+        "Play glyph#15:0": {
+          "type": "INSTANCE_SWAP",
+          "defaultValue": "8:145",
+          "preferredValues": []
+        },
+        "Reset glyph#15:21": {
+          "type": "INSTANCE_SWAP",
+          "defaultValue": "8:161",
+          "preferredValues": []
+        },
+        "Theme": {
+          "type": "VARIANT",
+          "defaultValue": "Dark",
+          "variantOptions": [
+            "Dark",
+            "Light"
+          ]
+        },
+        "Kind": {
+          "type": "VARIANT",
+          "defaultValue": "Accent",
+          "variantOptions": [
+            "Accent",
+            "Neutral"
+          ]
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Default",
+          "variantOptions": [
+            "Default",
+            "Hover",
+            "Pressed",
+            "Focus",
+            "Disabled"
+          ]
+        }
+      },
+      "source": "MainWindow StartPauseButton 48×44 / ResetButton 44×44; Styles.xaml",
+      "variants": {
+        "Theme=Dark, Kind=Accent, State=Default": {
+          "id": "11:134",
+          "key": "2f65ad7472e16fe271f099713d98f81b5d162241",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Accent",
+            "State": "Default"
+          }
+        },
+        "Theme=Dark, Kind=Accent, State=Hover": {
+          "id": "11:135",
+          "key": "5a8c9b0d37b697290733a82dfa5984e0e103ffec",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Accent",
+            "State": "Hover"
+          }
+        },
+        "Theme=Dark, Kind=Accent, State=Pressed": {
+          "id": "11:136",
+          "key": "73e139ad4a43db0921c30d26e3346e1bb4b469d0",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Accent",
+            "State": "Pressed"
+          }
+        },
+        "Theme=Dark, Kind=Accent, State=Focus": {
+          "id": "11:137",
+          "key": "e1dcd995517502c8c765135dd1359fee2b8d2d23",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Accent",
+            "State": "Focus"
+          }
+        },
+        "Theme=Dark, Kind=Accent, State=Disabled": {
+          "id": "11:138",
+          "key": "4b70812df2a13db6cd0d3181d63658167f110148",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Accent",
+            "State": "Disabled"
+          }
+        },
+        "Theme=Dark, Kind=Neutral, State=Default": {
+          "id": "11:139",
+          "key": "897bad5ade14d9d928476b94181ce1ad365fe7c8",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Neutral",
+            "State": "Default"
+          }
+        },
+        "Theme=Dark, Kind=Neutral, State=Hover": {
+          "id": "11:140",
+          "key": "344b35a4c2697919138b0687c425dfdb28a5f9ce",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Neutral",
+            "State": "Hover"
+          }
+        },
+        "Theme=Dark, Kind=Neutral, State=Pressed": {
+          "id": "11:141",
+          "key": "5800c287f25642b1b48a26823166fe8c9272f8e5",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Neutral",
+            "State": "Pressed"
+          }
+        },
+        "Theme=Dark, Kind=Neutral, State=Focus": {
+          "id": "11:142",
+          "key": "631c5d959f92de0baf320543a43085f28d079027",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Neutral",
+            "State": "Focus"
+          }
+        },
+        "Theme=Dark, Kind=Neutral, State=Disabled": {
+          "id": "11:143",
+          "key": "13419689054e7abfce723a887090b96ad24d5ba1",
+          "props": {
+            "Theme": "Dark",
+            "Kind": "Neutral",
+            "State": "Disabled"
+          }
+        },
+        "Theme=Light, Kind=Accent, State=Default": {
+          "id": "11:144",
+          "key": "d7ad6e8a9d1fe82dd6fe5d4e58b3eb03c46e6bac",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Accent",
+            "State": "Default"
+          }
+        },
+        "Theme=Light, Kind=Accent, State=Hover": {
+          "id": "11:145",
+          "key": "1e299a6f4760d3aa90e2bc2a101c4ac9211e129e",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Accent",
+            "State": "Hover"
+          }
+        },
+        "Theme=Light, Kind=Accent, State=Pressed": {
+          "id": "11:146",
+          "key": "c9c55530be22374d47650ba4dcd8c6105ad1d07c",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Accent",
+            "State": "Pressed"
+          }
+        },
+        "Theme=Light, Kind=Accent, State=Focus": {
+          "id": "11:147",
+          "key": "a2b49d3e9bbbf53d51cef54e63cc5f3c543bb71b",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Accent",
+            "State": "Focus"
+          }
+        },
+        "Theme=Light, Kind=Accent, State=Disabled": {
+          "id": "11:148",
+          "key": "61cc72b8ff8c12c78aac09eda105e77b43ac5912",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Accent",
+            "State": "Disabled"
+          }
+        },
+        "Theme=Light, Kind=Neutral, State=Default": {
+          "id": "11:149",
+          "key": "6304c35d8e26501bd9da97161386290942d914b7",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Neutral",
+            "State": "Default"
+          }
+        },
+        "Theme=Light, Kind=Neutral, State=Hover": {
+          "id": "11:150",
+          "key": "86f092fbd0be90d4b4f2151a96d151bc20d74126",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Neutral",
+            "State": "Hover"
+          }
+        },
+        "Theme=Light, Kind=Neutral, State=Pressed": {
+          "id": "11:151",
+          "key": "828f8d34fe1d6c9bff8585041f1786a931c521dd",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Neutral",
+            "State": "Pressed"
+          }
+        },
+        "Theme=Light, Kind=Neutral, State=Focus": {
+          "id": "11:152",
+          "key": "6a1d161809f5a3c3feae5889dbca6c989b8031b5",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Neutral",
+            "State": "Focus"
+          }
+        },
+        "Theme=Light, Kind=Neutral, State=Disabled": {
+          "id": "11:153",
+          "key": "b5c8c6a89618e765de6e7ea491fed1fd6bbe915e",
+          "props": {
+            "Theme": "Light",
+            "Kind": "Neutral",
+            "State": "Disabled"
+          }
+        }
+      }
+    },
+    "Button/Theme": {
+      "name": "Button/Theme",
+      "id": "11:249",
+      "key": "7f85f1ef2f3449086047396f63d72dfa6831122b",
+      "properties": {
+        "Sun glyph#15:42": {
+          "type": "INSTANCE_SWAP",
+          "defaultValue": "8:177",
+          "preferredValues": []
+        },
+        "Moon glyph#15:53": {
+          "type": "INSTANCE_SWAP",
+          "defaultValue": "8:185",
+          "preferredValues": []
+        },
+        "Theme": {
+          "type": "VARIANT",
+          "defaultValue": "Dark",
+          "variantOptions": [
+            "Dark",
+            "Light"
+          ]
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Default",
+          "variantOptions": [
+            "Default",
+            "Hover",
+            "Pressed",
+            "Focus",
+            "Disabled"
+          ]
+        }
+      },
+      "source": "MainWindow ThemeButton; Dark shows Sun, Light shows Moon; action switches theme",
+      "variants": {
+        "Theme=Dark, State=Default": {
+          "id": "11:239",
+          "key": "fc3579ce397add997d68742679d9123848cee894",
+          "props": {
+            "Theme": "Dark",
+            "State": "Default"
+          }
+        },
+        "Theme=Dark, State=Hover": {
+          "id": "11:240",
+          "key": "a7a57155f39ebe382ce94222cf83143bb7aca08d",
+          "props": {
+            "Theme": "Dark",
+            "State": "Hover"
+          }
+        },
+        "Theme=Dark, State=Pressed": {
+          "id": "11:241",
+          "key": "7eaec0e3315b8439480cd6175a6ac83d52676cbd",
+          "props": {
+            "Theme": "Dark",
+            "State": "Pressed"
+          }
+        },
+        "Theme=Dark, State=Focus": {
+          "id": "11:242",
+          "key": "8720efe16965f932966bd65fb9b9015742ec24c4",
+          "props": {
+            "Theme": "Dark",
+            "State": "Focus"
+          }
+        },
+        "Theme=Dark, State=Disabled": {
+          "id": "11:243",
+          "key": "342858bf0a1ea3fe4e8c21c44831d1ff90cc2075",
+          "props": {
+            "Theme": "Dark",
+            "State": "Disabled"
+          }
+        },
+        "Theme=Light, State=Default": {
+          "id": "11:244",
+          "key": "5ce86ce2ce78447c94c3d3ea875b12633d8cb225",
+          "props": {
+            "Theme": "Light",
+            "State": "Default"
+          }
+        },
+        "Theme=Light, State=Hover": {
+          "id": "11:245",
+          "key": "34f67b00ea7f7d4d99a9c9d389b4d9e6d1856149",
+          "props": {
+            "Theme": "Light",
+            "State": "Hover"
+          }
+        },
+        "Theme=Light, State=Pressed": {
+          "id": "11:246",
+          "key": "361fde398223b6ae108218296c435965086a5636",
+          "props": {
+            "Theme": "Light",
+            "State": "Pressed"
+          }
+        },
+        "Theme=Light, State=Focus": {
+          "id": "11:247",
+          "key": "53a58cc0f044632446b3122e574e1e8dae0ef61d",
+          "props": {
+            "Theme": "Light",
+            "State": "Focus"
+          }
+        },
+        "Theme=Light, State=Disabled": {
+          "id": "11:248",
+          "key": "5490f40159dbde883ddf78bb99a433ad33b13b5a",
+          "props": {
+            "Theme": "Light",
+            "State": "Disabled"
+          }
+        }
+      }
+    },
+    "Preset/Add": {
+      "name": "Preset/Add",
+      "id": "11:304",
+      "key": "8c10545d9bdcaaefc07f59b2b6fe5a30e538e661",
+      "properties": {
+        "Glyph#11:74": {
+          "type": "INSTANCE_SWAP",
+          "defaultValue": "8:169",
+          "preferredValues": []
+        },
+        "Theme": {
+          "type": "VARIANT",
+          "defaultValue": "Dark",
+          "variantOptions": [
+            "Dark",
+            "Light"
+          ]
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Default",
+          "variantOptions": [
+            "Default",
+            "Hover",
+            "Pressed",
+            "Focus",
+            "Disabled"
+          ]
+        }
+      },
+      "source": "MainWindow.RenderPresets add button; border=1, glyph=16; opens owned Add preset dialog",
+      "variants": {
+        "Theme=Dark, State=Default": {
+          "id": "11:294",
+          "key": "35c2dda8e212ef43dcf9dfc38f7d875c6f1ee8a6",
+          "props": {
+            "Theme": "Dark",
+            "State": "Default"
+          }
+        },
+        "Theme=Dark, State=Hover": {
+          "id": "11:295",
+          "key": "9ccab2c07caa2fb427ec3d8a3e23fd2360b5f11f",
+          "props": {
+            "Theme": "Dark",
+            "State": "Hover"
+          }
+        },
+        "Theme=Dark, State=Pressed": {
+          "id": "11:296",
+          "key": "4f873b7e64b4170dad514cbfdfd32beea06efbc6",
+          "props": {
+            "Theme": "Dark",
+            "State": "Pressed"
+          }
+        },
+        "Theme=Dark, State=Focus": {
+          "id": "11:297",
+          "key": "a85cdd5a4e18efe0224f66cd1c03fb78eda76a4f",
+          "props": {
+            "Theme": "Dark",
+            "State": "Focus"
+          }
+        },
+        "Theme=Dark, State=Disabled": {
+          "id": "11:298",
+          "key": "b85236876b8ba99fe09c9393f667b662f5f2ead8",
+          "props": {
+            "Theme": "Dark",
+            "State": "Disabled"
+          }
+        },
+        "Theme=Light, State=Default": {
+          "id": "11:299",
+          "key": "fe4e0bd534589915780976afdcfd6e0c703ed61e",
+          "props": {
+            "Theme": "Light",
+            "State": "Default"
+          }
+        },
+        "Theme=Light, State=Hover": {
+          "id": "11:300",
+          "key": "f6e33787856380edf7e3677c48235c079d870e36",
+          "props": {
+            "Theme": "Light",
+            "State": "Hover"
+          }
+        },
+        "Theme=Light, State=Pressed": {
+          "id": "11:301",
+          "key": "effdac305a568682596c590ac36fb4b5f9867e3f",
+          "props": {
+            "Theme": "Light",
+            "State": "Pressed"
+          }
+        },
+        "Theme=Light, State=Focus": {
+          "id": "11:302",
+          "key": "e605d5bb974c52e5730c3f357df6d25f893c590e",
+          "props": {
+            "Theme": "Light",
+            "State": "Focus"
+          }
+        },
+        "Theme=Light, State=Disabled": {
+          "id": "11:303",
+          "key": "4788a0c7ccbac02f8e8fcf25b851ff0d39543b9a",
+          "props": {
+            "Theme": "Light",
+            "State": "Disabled"
+          }
+        }
+      }
+    },
+    "Preset/Chip": {
+      "name": "Preset/Chip",
+      "id": "11:367",
+      "key": "45de9f5e474c4c78a4a418a91f09b53528106b55",
+      "properties": {
+        "Label#11:85": {
+          "type": "TEXT",
+          "defaultValue": "00:15:00"
+        },
+        "Theme": {
+          "type": "VARIANT",
+          "defaultValue": "Dark",
+          "variantOptions": [
+            "Dark",
+            "Light"
+          ]
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Default",
+          "variantOptions": [
+            "Default",
+            "Hover",
+            "Pressed",
+            "Focus",
+            "Disabled",
+            "Selected"
+          ]
+        }
+      },
+      "source": "MainWindow.RenderPresets; Selected iff favorite.Seconds == timer.InitialSeconds; click configures Ready without starting; right-click Edit/Remove",
+      "variants": {
+        "Theme=Dark, State=Default": {
+          "id": "11:355",
+          "key": "c297d7140a7f8b3eb2226767e285a1f4f09e0583",
+          "props": {
+            "Theme": "Dark",
+            "State": "Default"
+          }
+        },
+        "Theme=Dark, State=Hover": {
+          "id": "11:356",
+          "key": "16c4a5cd9dcc18b793699b737fc464d693e03644",
+          "props": {
+            "Theme": "Dark",
+            "State": "Hover"
+          }
+        },
+        "Theme=Dark, State=Pressed": {
+          "id": "11:357",
+          "key": "2c8792f6a5dd31f185f31d0ca3afac6f60067869",
+          "props": {
+            "Theme": "Dark",
+            "State": "Pressed"
+          }
+        },
+        "Theme=Dark, State=Focus": {
+          "id": "11:358",
+          "key": "f5d11fe7ab9ec3ea051aedd3f45a99e819cba614",
+          "props": {
+            "Theme": "Dark",
+            "State": "Focus"
+          }
+        },
+        "Theme=Dark, State=Disabled": {
+          "id": "11:359",
+          "key": "1209d86bdd70194b7b9da19f292a2a3a1fe1b7de",
+          "props": {
+            "Theme": "Dark",
+            "State": "Disabled"
+          }
+        },
+        "Theme=Dark, State=Selected": {
+          "id": "11:360",
+          "key": "431bc689203c6de0d95f7e01115f65ef73a7ad12",
+          "props": {
+            "Theme": "Dark",
+            "State": "Selected"
+          }
+        },
+        "Theme=Light, State=Default": {
+          "id": "11:361",
+          "key": "7d9c24274ab8c485e427317f1e0d0b5aa1e500b8",
+          "props": {
+            "Theme": "Light",
+            "State": "Default"
+          }
+        },
+        "Theme=Light, State=Hover": {
+          "id": "11:362",
+          "key": "e972f82fd5422706642037a0cc1fb37288d15fd1",
+          "props": {
+            "Theme": "Light",
+            "State": "Hover"
+          }
+        },
+        "Theme=Light, State=Pressed": {
+          "id": "11:363",
+          "key": "2574abd2753d0607ad9827147ee4f8807601ae4c",
+          "props": {
+            "Theme": "Light",
+            "State": "Pressed"
+          }
+        },
+        "Theme=Light, State=Focus": {
+          "id": "11:364",
+          "key": "84160b45953dd32a2afefe6a53ccf9fa0f765b25",
+          "props": {
+            "Theme": "Light",
+            "State": "Focus"
+          }
+        },
+        "Theme=Light, State=Disabled": {
+          "id": "11:365",
+          "key": "02e80eb026fd10bce327ad07dec2fdebeb167e1a",
+          "props": {
+            "Theme": "Light",
+            "State": "Disabled"
+          }
+        },
+        "Theme=Light, State=Selected": {
+          "id": "11:366",
+          "key": "a95e15052c46315dbdf9bee9bfbad53155be3273",
+          "props": {
+            "Theme": "Light",
+            "State": "Selected"
+          }
+        }
+      }
+    },
+    "Tab": {
+      "name": "Tab",
+      "id": "11:418",
+      "key": "415652565a77d51ae9dc305cf06d40806e117da2",
+      "properties": {
+        "Label#11:98": {
+          "type": "TEXT",
+          "defaultValue": "Timer"
+        },
+        "Theme": {
+          "type": "VARIANT",
+          "defaultValue": "Dark",
+          "variantOptions": [
+            "Dark",
+            "Light"
+          ]
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Default",
+          "variantOptions": [
+            "Default",
+            "Hover",
+            "Pressed",
+            "Focus",
+            "Disabled"
+          ]
+        }
+      },
+      "source": "MainWindow Timer tab ButtonBase; Record uses transparent background, DisabledBrush and 0.45 opacity; no Record action in v1",
+      "variants": {
+        "Theme=Dark, State=Default": {
+          "id": "11:408",
+          "key": "478aa4af1c2c2c089b37133d1f8a9d1372a45fdc",
+          "props": {
+            "Theme": "Dark",
+            "State": "Default"
+          }
+        },
+        "Theme=Dark, State=Hover": {
+          "id": "11:409",
+          "key": "39de7e0cb2cde8c732d81a44f58ab4ac2ebd39af",
+          "props": {
+            "Theme": "Dark",
+            "State": "Hover"
+          }
+        },
+        "Theme=Dark, State=Pressed": {
+          "id": "11:410",
+          "key": "08985691dda296de5a0e280b649ba5c9b7fd0443",
+          "props": {
+            "Theme": "Dark",
+            "State": "Pressed"
+          }
+        },
+        "Theme=Dark, State=Focus": {
+          "id": "11:411",
+          "key": "e1e56a97a10a065a39198ff143d0f2692499644b",
+          "props": {
+            "Theme": "Dark",
+            "State": "Focus"
+          }
+        },
+        "Theme=Dark, State=Disabled": {
+          "id": "11:412",
+          "key": "eec8ef6e12a9f94c3c0ee81bd80c3c5ccf15b4ca",
+          "props": {
+            "Theme": "Dark",
+            "State": "Disabled"
+          }
+        },
+        "Theme=Light, State=Default": {
+          "id": "11:413",
+          "key": "4b02221cefb3cc368625cf8612687dc52f50f396",
+          "props": {
+            "Theme": "Light",
+            "State": "Default"
+          }
+        },
+        "Theme=Light, State=Hover": {
+          "id": "11:414",
+          "key": "b7f831163d1e00abc11b628d6b16e5ec44196356",
+          "props": {
+            "Theme": "Light",
+            "State": "Hover"
+          }
+        },
+        "Theme=Light, State=Pressed": {
+          "id": "11:415",
+          "key": "0afa190d4b39d2b6d183a45d46c06fdb3349142c",
+          "props": {
+            "Theme": "Light",
+            "State": "Pressed"
+          }
+        },
+        "Theme=Light, State=Focus": {
+          "id": "11:416",
+          "key": "7bab67f96c87102b98907d8b6c4498702e588b4a",
+          "props": {
+            "Theme": "Light",
+            "State": "Focus"
+          }
+        },
+        "Theme=Light, State=Disabled": {
+          "id": "11:417",
+          "key": "5c261159a1a7e7df9075957e17f0b537e59b3769",
+          "props": {
+            "Theme": "Light",
+            "State": "Disabled"
+          }
+        }
+      }
+    },
+    "Time/Field": {
+      "name": "Time/Field",
+      "id": "11:465",
+      "key": "6feb229fbd5fa8d00983eda0d2fb5f649cbd6a34",
+      "properties": {
+        "Value#11:109": {
+          "type": "TEXT",
+          "defaultValue": "00"
+        },
+        "Caption#11:122": {
+          "type": "TEXT",
+          "defaultValue": "HOURS"
+        },
+        "Theme": {
+          "type": "VARIANT",
+          "defaultValue": "Dark",
+          "variantOptions": [
+            "Dark",
+            "Light"
+          ]
+        },
+        "Size": {
+          "type": "VARIANT",
+          "defaultValue": "Main",
+          "variantOptions": [
+            "Main",
+            "Dialog"
+          ]
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Default",
+          "variantOptions": [
+            "Default",
+            "Hover",
+            "Focus"
+          ]
+        }
+      },
+      "source": "DurationEditor.xaml / ApplySizing; Main width92 font60 height74; Dialog width80 font24 height38; focus border2 Accent, hover Raised",
+      "variants": {
+        "Theme=Dark, Size=Main, State=Default": {
+          "id": "11:453",
+          "key": "e38748b50a8d0aeb2727c8e9e4d48d24e2eba207",
+          "props": {
+            "Theme": "Dark",
+            "Size": "Main",
+            "State": "Default"
+          }
+        },
+        "Theme=Dark, Size=Main, State=Hover": {
+          "id": "11:454",
+          "key": "a030ef701d224c4a725a17ef0027fc4559479b54",
+          "props": {
+            "Theme": "Dark",
+            "Size": "Main",
+            "State": "Hover"
+          }
+        },
+        "Theme=Dark, Size=Main, State=Focus": {
+          "id": "11:455",
+          "key": "a105723b06b9f2d975d9d83d6d4f61fdb57d02df",
+          "props": {
+            "Theme": "Dark",
+            "Size": "Main",
+            "State": "Focus"
+          }
+        },
+        "Theme=Dark, Size=Dialog, State=Default": {
+          "id": "11:456",
+          "key": "0ad7e68509be6c45aff0aef6cf6d3537f234f1c7",
+          "props": {
+            "Theme": "Dark",
+            "Size": "Dialog",
+            "State": "Default"
+          }
+        },
+        "Theme=Dark, Size=Dialog, State=Hover": {
+          "id": "11:457",
+          "key": "1e6504c25a5d75c1f130b6da6046b2059ac6b69b",
+          "props": {
+            "Theme": "Dark",
+            "Size": "Dialog",
+            "State": "Hover"
+          }
+        },
+        "Theme=Dark, Size=Dialog, State=Focus": {
+          "id": "11:458",
+          "key": "e77a6a1acf4b350067ce0789ba52d1d8b9505b9a",
+          "props": {
+            "Theme": "Dark",
+            "Size": "Dialog",
+            "State": "Focus"
+          }
+        },
+        "Theme=Light, Size=Main, State=Default": {
+          "id": "11:459",
+          "key": "c9953e8ed2bde75cdff63c786e87291508cf5b00",
+          "props": {
+            "Theme": "Light",
+            "Size": "Main",
+            "State": "Default"
+          }
+        },
+        "Theme=Light, Size=Main, State=Hover": {
+          "id": "11:460",
+          "key": "6cac92b1ed71527772c02b92025ef6810f0ca181",
+          "props": {
+            "Theme": "Light",
+            "Size": "Main",
+            "State": "Hover"
+          }
+        },
+        "Theme=Light, Size=Main, State=Focus": {
+          "id": "11:461",
+          "key": "b0a122efe074e444dab7070f39f39c78fe884630",
+          "props": {
+            "Theme": "Light",
+            "Size": "Main",
+            "State": "Focus"
+          }
+        },
+        "Theme=Light, Size=Dialog, State=Default": {
+          "id": "11:462",
+          "key": "886767c3d31aad4c6e598c63e67b604ab049f4e5",
+          "props": {
+            "Theme": "Light",
+            "Size": "Dialog",
+            "State": "Default"
+          }
+        },
+        "Theme=Light, Size=Dialog, State=Hover": {
+          "id": "11:463",
+          "key": "2097cccedf1ab799f6bcccb6dee940b94ca2cd83",
+          "props": {
+            "Theme": "Light",
+            "Size": "Dialog",
+            "State": "Hover"
+          }
+        },
+        "Theme=Light, Size=Dialog, State=Focus": {
+          "id": "11:464",
+          "key": "b4f594180cf0161356beae0ac7b284b36a3539e8",
+          "props": {
+            "Theme": "Light",
+            "Size": "Dialog",
+            "State": "Focus"
+          }
+        }
+      }
+    },
+    "Menu/Item": {
+      "name": "Menu/Item",
+      "id": "11:526",
+      "key": "b73789955760aaa844be9b53a7388829153dee55",
+      "properties": {
+        "Theme": {
+          "type": "VARIANT",
+          "defaultValue": "Dark",
+          "variantOptions": [
+            "Dark",
+            "Light"
+          ]
+        },
+        "Action": {
+          "type": "VARIANT",
+          "defaultValue": "Edit",
+          "variantOptions": [
+            "Edit",
+            "Remove"
+          ]
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Default",
+          "variantOptions": [
+            "Default",
+            "Hover"
+          ]
+        }
+      },
+      "source": "Styles.xaml MenuItem; Highlighted background HoverBrush; Remove text ErrorBrush; MainWindow.RenderPresets handlers",
+      "variants": {
+        "Theme=Dark, Action=Edit, State=Default": {
+          "id": "11:518",
+          "key": "b20578f0bc0e59c96443491348a654de79711cec",
+          "props": {
+            "Theme": "Dark",
+            "Action": "Edit",
+            "State": "Default"
+          }
+        },
+        "Theme=Dark, Action=Edit, State=Hover": {
+          "id": "11:519",
+          "key": "281105112bbd1c8cfbe6a9a2b7564773ad607612",
+          "props": {
+            "Theme": "Dark",
+            "Action": "Edit",
+            "State": "Hover"
+          }
+        },
+        "Theme=Dark, Action=Remove, State=Default": {
+          "id": "11:520",
+          "key": "c66ff095066b0853dcb4d081d659a7376eefb3d8",
+          "props": {
+            "Theme": "Dark",
+            "Action": "Remove",
+            "State": "Default"
+          }
+        },
+        "Theme=Dark, Action=Remove, State=Hover": {
+          "id": "11:521",
+          "key": "315f417cd644ec5283e42a99adf1d4f1a211e684",
+          "props": {
+            "Theme": "Dark",
+            "Action": "Remove",
+            "State": "Hover"
+          }
+        },
+        "Theme=Light, Action=Edit, State=Default": {
+          "id": "11:522",
+          "key": "e4ab8f832b03777eb5c616bd9bab8e63cb422de9",
+          "props": {
+            "Theme": "Light",
+            "Action": "Edit",
+            "State": "Default"
+          }
+        },
+        "Theme=Light, Action=Edit, State=Hover": {
+          "id": "11:523",
+          "key": "7dbe1358041cb67ba1ed390ceb1de5402cda3416",
+          "props": {
+            "Theme": "Light",
+            "Action": "Edit",
+            "State": "Hover"
+          }
+        },
+        "Theme=Light, Action=Remove, State=Default": {
+          "id": "11:524",
+          "key": "bf3ef6dd2cadb2d977bfb9b4eda0a406c51f8ba7",
+          "props": {
+            "Theme": "Light",
+            "Action": "Remove",
+            "State": "Default"
+          }
+        },
+        "Theme=Light, Action=Remove, State=Hover": {
+          "id": "11:525",
+          "key": "c7d52400ddff25ee6d3b4c2369d6ab6a0d2b0a87",
+          "props": {
+            "Theme": "Light",
+            "Action": "Remove",
+            "State": "Hover"
+          }
+        }
+      }
+    }
+  },
+  "counts": {
+    "pages": 3,
+    "collections": 4,
+    "variables": 70,
+    "semanticColorRoles": 13,
+    "semanticColorVariables": 26,
+    "primitiveColors": 26,
+    "metrics": 18,
+    "textStyles": 11,
+    "componentSets": 8,
+    "variants": 102,
+    "glyphComponents": 10,
+    "totalComponentNodes": 112,
+    "sourceReactionNodes": 86,
+    "sourceReactions": 102,
+    "readBackReactionNodesIncludingInstances": 172
+  },
+  "prototypeContract": {
+    "completedTriggers": [
+      "ON_HOVER",
+      "MOUSE_LEAVE",
+      "MOUSE_DOWN",
+      "MOUSE_UP"
+    ],
+    "navigation": "CHANGE_TO",
+    "source": "docs/figma-design-map.json.componentSets.*.variants",
+    "notCompleted": [
+      "Timer Ready/Running/Paused composed views",
+      "Preset Add/Edit owned-dialog composition",
+      "Preset context-menu composition",
+      "Full theme/start/pause/reset/add/edit/remove flow prototype",
+      "Dedicated 42×32 Window chrome TitleButton state family",
+      "Time field text-selection highlight variant"
+    ]
+  },
+  "interactionRules": {
+    "record": "Disabled; no Record action in v1",
+    "presetClick": "Configure duration and Ready; do not auto-start",
+    "addEdit": "Modify preset list only, keep running countdown",
+    "remove": "Remove favorite only; preserve current timer",
+    "reset": "Most recently configured duration and Ready",
+    "theme": "Preserve countdown state",
+    "hourInput": "40 -> 40 hours; 8 -> 08 hours",
+    "minuteInput": "408 -> 04 hours 08 minutes; preserve seconds",
+    "secondInput": "123000 -> 12:30:00",
+    "configStorage": "B01Timer.ini beside exe",
+    "figmaSync": "Manual on request; read current Figma IDs and compare to current code. No automatic sync."
+  },
+  "visualEvidence": {
+    "foundations": {
+      "url": "https://www.figma.com/api/mcp/asset/917b6b85-510d-466f-b627-70c8f3527d5e.png",
+      "dimensions": [
+        1200,
+        1761
+      ],
+      "review": "passed after auto-layout repair; downloaded URL is blocked by executor"
+    },
+    "components": {
+      "url": "https://www.figma.com/api/mcp/asset/6025b8c4-5cfc-4c9f-b994-175118f4be8d.png",
+      "dimensions": [
+        1400,
+        2502
+      ],
+      "review": "passed after fixed geometry/glyph/opacity repairs; Cancel/Record text overrides then applied"
+    }
+  },
+  "resumeScript": "docs/figma-complete-interactions.js",
+  "createdNodeIds": {
+    "foundations": [
+      "8:2",
+      "8:3",
+      "8:4",
+      "8:5",
+      "8:6",
+      "8:7",
+      "8:8",
+      "8:9",
+      "8:10",
+      "8:11",
+      "8:12",
+      "8:13",
+      "8:14",
+      "8:15",
+      "8:16",
+      "8:17",
+      "8:18",
+      "8:19",
+      "8:20",
+      "8:21",
+      "8:22",
+      "8:23",
+      "8:24",
+      "8:25",
+      "8:26",
+      "8:27",
+      "8:28",
+      "8:29",
+      "8:30",
+      "8:31",
+      "8:32",
+      "8:33",
+      "8:34",
+      "8:35",
+      "8:36",
+      "8:37",
+      "8:38",
+      "8:39",
+      "8:40",
+      "8:41",
+      "8:42",
+      "8:43",
+      "8:44",
+      "8:45",
+      "8:46",
+      "8:47",
+      "8:48",
+      "8:49",
+      "8:50",
+      "8:51",
+      "8:52",
+      "8:53",
+      "8:54",
+      "8:55",
+      "8:56",
+      "8:57",
+      "8:58",
+      "8:59",
+      "8:60",
+      "8:61",
+      "8:62",
+      "8:63",
+      "8:64",
+      "8:65",
+      "8:66",
+      "8:67",
+      "8:68",
+      "8:69",
+      "8:70",
+      "8:71",
+      "8:72",
+      "8:73",
+      "8:74",
+      "8:75",
+      "8:76",
+      "8:77",
+      "8:78",
+      "8:79",
+      "8:80",
+      "8:81",
+      "8:82",
+      "8:83",
+      "8:84",
+      "8:85",
+      "8:86",
+      "8:87",
+      "8:88",
+      "8:89",
+      "8:90",
+      "8:91",
+      "8:92",
+      "8:93",
+      "8:94",
+      "8:95",
+      "8:96",
+      "8:97",
+      "8:98",
+      "8:99",
+      "8:100",
+      "8:101",
+      "8:102",
+      "8:103",
+      "8:104",
+      "8:105",
+      "8:106",
+      "8:107",
+      "8:108",
+      "8:109",
+      "8:110",
+      "8:111",
+      "8:112",
+      "8:113",
+      "8:114",
+      "8:115",
+      "8:116",
+      "8:117",
+      "8:118",
+      "8:119",
+      "8:120",
+      "8:121",
+      "8:122",
+      "8:123",
+      "8:124",
+      "8:125",
+      "8:126",
+      "8:127",
+      "8:128",
+      "8:129",
+      "8:130",
+      "8:131",
+      "8:132",
+      "8:133",
+      "8:134",
+      "8:135",
+      "8:136",
+      "8:137",
+      "8:138",
+      "8:139",
+      "8:140",
+      "8:141",
+      "8:142",
+      "8:143",
+      "8:144",
+      "8:145",
+      "8:146",
+      "8:147",
+      "8:148",
+      "8:149",
+      "I8:149;8:146",
+      "I8:149;8:147",
+      "8:152",
+      "8:153",
+      "8:154",
+      "8:155",
+      "8:156",
+      "8:157",
+      "I8:157;8:154",
+      "I8:157;8:155",
+      "8:160",
+      "8:161",
+      "8:162",
+      "8:163",
+      "8:164",
+      "8:165",
+      "I8:165;8:162",
+      "I8:165;8:163",
+      "8:168",
+      "8:169",
+      "8:170",
+      "8:171",
+      "8:172",
+      "8:173",
+      "I8:173;8:170",
+      "I8:173;8:171",
+      "8:176",
+      "8:177",
+      "8:178",
+      "8:179",
+      "8:180",
+      "8:181",
+      "I8:181;8:178",
+      "I8:181;8:179",
+      "8:184",
+      "8:185",
+      "8:186",
+      "8:187",
+      "8:188",
+      "8:189",
+      "I8:189;8:186",
+      "I8:189;8:187",
+      "8:192",
+      "8:193",
+      "8:194",
+      "8:195",
+      "8:196",
+      "8:197",
+      "I8:197;8:194",
+      "I8:197;8:195",
+      "8:200",
+      "8:201",
+      "8:202",
+      "8:203",
+      "8:204",
+      "8:205",
+      "I8:205;8:202",
+      "I8:205;8:203",
+      "8:208",
+      "8:209",
+      "8:210",
+      "8:211",
+      "8:212",
+      "8:213",
+      "I8:213;8:210",
+      "I8:213;8:211",
+      "8:216",
+      "8:217",
+      "8:218",
+      "8:219",
+      "8:220",
+      "8:221",
+      "8:222",
+      "I8:222;8:218",
+      "I8:222;8:219",
+      "I8:222;8:220",
+      "8:226",
+      "8:227",
+      "8:228"
+    ],
+    "components": [
+      "11:89",
+      "11:69",
+      "11:90",
+      "11:70",
+      "11:91",
+      "11:71",
+      "11:92",
+      "11:72",
+      "11:93",
+      "11:94",
+      "11:73",
+      "11:95",
+      "11:74",
+      "11:96",
+      "11:75",
+      "11:97",
+      "11:76",
+      "11:98",
+      "11:77",
+      "11:99",
+      "11:100",
+      "11:78",
+      "11:101",
+      "11:79",
+      "11:102",
+      "11:80",
+      "11:103",
+      "11:81",
+      "11:104",
+      "11:82",
+      "11:105",
+      "11:106",
+      "11:83",
+      "11:107",
+      "11:84",
+      "11:108",
+      "11:85",
+      "11:109",
+      "11:86",
+      "11:110",
+      "11:87",
+      "11:111",
+      "11:112",
+      "11:88",
+      "11:113",
+      "11:154",
+      "11:134",
+      "11:155",
+      "I11:155;8:146",
+      "I11:155;8:147",
+      "11:135",
+      "11:158",
+      "I11:158;8:146",
+      "I11:158;8:147",
+      "11:136",
+      "11:161",
+      "I11:161;8:146",
+      "I11:161;8:147",
+      "11:137",
+      "11:164",
+      "I11:164;8:146",
+      "I11:164;8:147",
+      "11:167",
+      "11:138",
+      "11:168",
+      "I11:168;8:146",
+      "I11:168;8:147",
+      "11:139",
+      "11:171",
+      "I11:171;8:162",
+      "I11:171;8:163",
+      "11:140",
+      "11:174",
+      "I11:174;8:162",
+      "I11:174;8:163",
+      "11:141",
+      "11:177",
+      "I11:177;8:162",
+      "I11:177;8:163",
+      "11:142",
+      "11:180",
+      "I11:180;8:162",
+      "I11:180;8:163",
+      "11:183",
+      "11:143",
+      "11:184",
+      "I11:184;8:162",
+      "I11:184;8:163",
+      "11:144",
+      "11:187",
+      "I11:187;8:146",
+      "I11:187;8:147",
+      "11:145",
+      "11:190",
+      "I11:190;8:146",
+      "I11:190;8:147",
+      "11:146",
+      "11:193",
+      "I11:193;8:146",
+      "I11:193;8:147",
+      "11:147",
+      "11:196",
+      "I11:196;8:146",
+      "I11:196;8:147",
+      "11:199",
+      "11:148",
+      "11:200",
+      "I11:200;8:146",
+      "I11:200;8:147",
+      "11:149",
+      "11:203",
+      "I11:203;8:162",
+      "I11:203;8:163",
+      "11:150",
+      "11:206",
+      "I11:206;8:162",
+      "I11:206;8:163",
+      "11:151",
+      "11:209",
+      "I11:209;8:162",
+      "I11:209;8:163",
+      "11:152",
+      "11:212",
+      "I11:212;8:162",
+      "I11:212;8:163",
+      "11:215",
+      "11:153",
+      "11:216",
+      "I11:216;8:162",
+      "I11:216;8:163",
+      "11:249",
+      "11:239",
+      "11:252",
+      "I11:252;8:178",
+      "I11:252;8:179",
+      "11:240",
+      "11:255",
+      "I11:255;8:178",
+      "I11:255;8:179",
+      "11:241",
+      "11:258",
+      "I11:258;8:178",
+      "I11:258;8:179",
+      "11:242",
+      "11:261",
+      "I11:261;8:178",
+      "I11:261;8:179",
+      "11:264",
+      "11:243",
+      "11:265",
+      "I11:265;8:178",
+      "I11:265;8:179",
+      "11:244",
+      "11:268",
+      "I11:268;8:186",
+      "I11:268;8:187",
+      "11:245",
+      "11:271",
+      "I11:271;8:186",
+      "I11:271;8:187",
+      "11:246",
+      "11:274",
+      "I11:274;8:186",
+      "I11:274;8:187",
+      "11:247",
+      "11:277",
+      "I11:277;8:186",
+      "I11:277;8:187",
+      "11:280",
+      "11:248",
+      "11:281",
+      "I11:281;8:186",
+      "I11:281;8:187",
+      "11:304",
+      "11:294",
+      "11:313",
+      "I11:313;8:170",
+      "I11:313;8:171",
+      "11:295",
+      "11:316",
+      "I11:316;8:170",
+      "I11:316;8:171",
+      "11:296",
+      "11:319",
+      "I11:319;8:170",
+      "I11:319;8:171",
+      "11:297",
+      "11:322",
+      "I11:322;8:170",
+      "I11:322;8:171",
+      "11:325",
+      "11:298",
+      "11:326",
+      "I11:326;8:170",
+      "I11:326;8:171",
+      "11:299",
+      "11:329",
+      "I11:329;8:170",
+      "I11:329;8:171",
+      "11:300",
+      "11:332",
+      "I11:332;8:170",
+      "I11:332;8:171",
+      "11:301",
+      "11:335",
+      "I11:335;8:170",
+      "I11:335;8:171",
+      "11:302",
+      "11:338",
+      "I11:338;8:170",
+      "I11:338;8:171",
+      "11:341",
+      "11:303",
+      "11:342",
+      "I11:342;8:170",
+      "I11:342;8:171",
+      "11:367",
+      "11:355",
+      "11:382",
+      "11:356",
+      "11:383",
+      "11:357",
+      "11:384",
+      "11:358",
+      "11:385",
+      "11:386",
+      "11:359",
+      "11:387",
+      "11:360",
+      "11:388",
+      "11:361",
+      "11:389",
+      "11:362",
+      "11:390",
+      "11:363",
+      "11:391",
+      "11:364",
+      "11:392",
+      "11:393",
+      "11:365",
+      "11:394",
+      "11:366",
+      "11:395",
+      "11:418",
+      "11:408",
+      "11:431",
+      "11:409",
+      "11:432",
+      "11:410",
+      "11:433",
+      "11:411",
+      "11:434",
+      "11:435",
+      "11:412",
+      "11:436",
+      "11:413",
+      "11:437",
+      "11:414",
+      "11:438",
+      "11:415",
+      "11:439",
+      "11:416",
+      "11:440",
+      "11:441",
+      "11:417",
+      "11:442",
+      "11:465",
+      "11:453",
+      "11:470",
+      "11:471",
+      "11:472",
+      "11:454",
+      "11:473",
+      "11:474",
+      "11:475",
+      "11:455",
+      "11:476",
+      "11:477",
+      "11:478",
+      "11:456",
+      "11:479",
+      "11:480",
+      "11:481",
+      "11:457",
+      "11:482",
+      "11:483",
+      "11:484",
+      "11:458",
+      "11:485",
+      "11:486",
+      "11:487",
+      "11:459",
+      "11:488",
+      "11:489",
+      "11:490",
+      "11:460",
+      "11:491",
+      "11:492",
+      "11:493",
+      "11:461",
+      "11:494",
+      "11:495",
+      "11:496",
+      "11:462",
+      "11:497",
+      "11:498",
+      "11:499",
+      "11:463",
+      "11:500",
+      "11:501",
+      "11:502",
+      "11:464",
+      "11:503",
+      "11:504",
+      "11:505",
+      "11:526",
+      "11:518",
+      "11:527",
+      "11:519",
+      "11:528",
+      "11:520",
+      "11:529",
+      "11:521",
+      "11:530",
+      "11:522",
+      "11:531",
+      "11:523",
+      "11:532",
+      "11:524",
+      "11:533",
+      "11:525",
+      "11:534",
+      "11:543",
+      "11:544",
+      "11:545",
+      "11:546",
+      "11:547",
+      "11:548",
+      "I11:548;11:90",
+      "11:550",
+      "11:551",
+      "11:552",
+      "I11:552;11:91",
+      "11:554",
+      "11:555",
+      "11:556",
+      "I11:556;11:92",
+      "11:558",
+      "11:559",
+      "11:560",
+      "I11:560;11:93",
+      "I11:560;11:94",
+      "11:563",
+      "11:564",
+      "11:565",
+      "I11:565;11:95",
+      "11:567",
+      "11:568",
+      "11:569",
+      "I11:569;11:96",
+      "11:571",
+      "11:572",
+      "11:573",
+      "I11:573;11:97",
+      "11:575",
+      "11:576",
+      "11:577",
+      "I11:577;11:98",
+      "11:579",
+      "11:580",
+      "11:581",
+      "I11:581;11:99",
+      "I11:581;11:100",
+      "11:584",
+      "11:585",
+      "11:586",
+      "I11:586;11:101",
+      "11:588",
+      "11:589",
+      "11:590",
+      "11:591",
+      "I11:591;11:102",
+      "11:593",
+      "11:594",
+      "11:595",
+      "I11:595;11:103",
+      "11:597",
+      "11:598",
+      "11:599",
+      "I11:599;11:104",
+      "11:601",
+      "11:602",
+      "11:603",
+      "I11:603;11:105",
+      "I11:603;11:106",
+      "11:606",
+      "11:607",
+      "11:608",
+      "I11:608;11:107",
+      "11:610",
+      "11:611",
+      "11:612",
+      "I11:612;11:108",
+      "11:614",
+      "11:615",
+      "11:616",
+      "I11:616;11:109",
+      "11:618",
+      "11:619",
+      "11:620",
+      "I11:620;11:110",
+      "11:622",
+      "11:623",
+      "11:624",
+      "I11:624;11:111",
+      "I11:624;11:112",
+      "11:627",
+      "11:628",
+      "11:629",
+      "I11:629;11:113",
+      "11:631",
+      "11:632",
+      "11:633",
+      "11:634",
+      "11:635",
+      "I11:635;11:155",
+      "I11:635;11:155;8:146",
+      "I11:635;11:155;8:147",
+      "11:639",
+      "11:640",
+      "11:641",
+      "I11:641;11:158",
+      "I11:641;11:158;8:146",
+      "I11:641;11:158;8:147",
+      "11:645",
+      "11:646",
+      "11:647",
+      "I11:647;11:161",
+      "I11:647;11:161;8:146",
+      "I11:647;11:161;8:147",
+      "11:651",
+      "11:652",
+      "11:653",
+      "I11:653;11:164",
+      "I11:653;11:164;8:146",
+      "I11:653;11:164;8:147",
+      "I11:653;11:167",
+      "11:658",
+      "11:659",
+      "11:660",
+      "I11:660;11:168",
+      "I11:660;11:168;8:146",
+      "I11:660;11:168;8:147",
+      "11:664",
+      "11:665",
+      "11:666",
+      "I11:666;11:171",
+      "I11:666;11:171;8:146",
+      "I11:666;11:171;8:147",
+      "11:670",
+      "11:671",
+      "11:672",
+      "I11:672;11:174",
+      "I11:672;11:174;8:146",
+      "I11:672;11:174;8:147",
+      "11:676",
+      "11:677",
+      "11:678",
+      "I11:678;11:177",
+      "I11:678;11:177;8:146",
+      "I11:678;11:177;8:147",
+      "11:682",
+      "11:683",
+      "11:684",
+      "I11:684;11:180",
+      "I11:684;11:180;8:146",
+      "I11:684;11:180;8:147",
+      "I11:684;11:183",
+      "11:689",
+      "11:690",
+      "11:691",
+      "I11:691;11:184",
+      "I11:691;11:184;8:146",
+      "I11:691;11:184;8:147",
+      "11:695",
+      "11:696",
+      "11:697",
+      "11:698",
+      "I11:698;11:187",
+      "I11:698;11:187;8:146",
+      "I11:698;11:187;8:147",
+      "11:702",
+      "11:703",
+      "11:704",
+      "I11:704;11:190",
+      "I11:704;11:190;8:146",
+      "I11:704;11:190;8:147",
+      "11:708",
+      "11:709",
+      "11:710",
+      "I11:710;11:193",
+      "I11:710;11:193;8:146",
+      "I11:710;11:193;8:147",
+      "11:714",
+      "11:715",
+      "11:716",
+      "I11:716;11:196",
+      "I11:716;11:196;8:146",
+      "I11:716;11:196;8:147",
+      "I11:716;11:199",
+      "11:721",
+      "11:722",
+      "11:723",
+      "I11:723;11:200",
+      "I11:723;11:200;8:146",
+      "I11:723;11:200;8:147",
+      "11:727",
+      "11:728",
+      "11:729",
+      "I11:729;11:203",
+      "I11:729;11:203;8:146",
+      "I11:729;11:203;8:147",
+      "11:733",
+      "11:734",
+      "11:735",
+      "I11:735;11:206",
+      "I11:735;11:206;8:146",
+      "I11:735;11:206;8:147",
+      "11:739",
+      "11:740",
+      "11:741",
+      "I11:741;11:209",
+      "I11:741;11:209;8:146",
+      "I11:741;11:209;8:147",
+      "11:745",
+      "11:746",
+      "11:747",
+      "I11:747;11:212",
+      "I11:747;11:212;8:146",
+      "I11:747;11:212;8:147",
+      "I11:747;11:215",
+      "11:752",
+      "11:753",
+      "11:754",
+      "I11:754;11:216",
+      "I11:754;11:216;8:146",
+      "I11:754;11:216;8:147",
+      "11:758",
+      "11:759",
+      "11:760",
+      "11:761",
+      "11:762",
+      "I11:762;11:252",
+      "I11:762;11:252;8:146",
+      "I11:762;11:252;8:147",
+      "11:766",
+      "11:767",
+      "11:768",
+      "I11:768;11:255",
+      "I11:768;11:255;8:146",
+      "I11:768;11:255;8:147",
+      "11:772",
+      "11:773",
+      "11:774",
+      "I11:774;11:258",
+      "I11:774;11:258;8:146",
+      "I11:774;11:258;8:147",
+      "11:778",
+      "11:779",
+      "11:780",
+      "I11:780;11:261",
+      "I11:780;11:261;8:146",
+      "I11:780;11:261;8:147",
+      "I11:780;11:264",
+      "11:785",
+      "11:786",
+      "11:787",
+      "I11:787;11:265",
+      "I11:787;11:265;8:146",
+      "I11:787;11:265;8:147",
+      "11:791",
+      "11:792",
+      "11:793",
+      "11:794",
+      "I11:794;11:268",
+      "I11:794;11:268;8:146",
+      "I11:794;11:268;8:147",
+      "11:798",
+      "11:799",
+      "11:800",
+      "I11:800;11:271",
+      "I11:800;11:271;8:146",
+      "I11:800;11:271;8:147",
+      "11:804",
+      "11:805",
+      "11:806",
+      "I11:806;11:274",
+      "I11:806;11:274;8:146",
+      "I11:806;11:274;8:147",
+      "11:810",
+      "11:811",
+      "11:812",
+      "I11:812;11:277",
+      "I11:812;11:277;8:146",
+      "I11:812;11:277;8:147",
+      "I11:812;11:280",
+      "11:817",
+      "11:818",
+      "11:819",
+      "I11:819;11:281",
+      "I11:819;11:281;8:146",
+      "I11:819;11:281;8:147",
+      "11:823",
+      "11:824",
+      "11:825",
+      "11:826",
+      "11:827",
+      "I11:827;11:313",
+      "I11:827;11:313;8:170",
+      "I11:827;11:313;8:171",
+      "11:831",
+      "11:832",
+      "11:833",
+      "I11:833;11:316",
+      "I11:833;11:316;8:170",
+      "I11:833;11:316;8:171",
+      "11:837",
+      "11:838",
+      "11:839",
+      "I11:839;11:319",
+      "I11:839;11:319;8:170",
+      "I11:839;11:319;8:171",
+      "11:843",
+      "11:844",
+      "11:845",
+      "I11:845;11:322",
+      "I11:845;11:322;8:170",
+      "I11:845;11:322;8:171",
+      "I11:845;11:325",
+      "11:850",
+      "11:851",
+      "11:852",
+      "I11:852;11:326",
+      "I11:852;11:326;8:170",
+      "I11:852;11:326;8:171",
+      "11:856",
+      "11:857",
+      "11:858",
+      "11:859",
+      "I11:859;11:329",
+      "I11:859;11:329;8:170",
+      "I11:859;11:329;8:171",
+      "11:863",
+      "11:864",
+      "11:865",
+      "I11:865;11:332",
+      "I11:865;11:332;8:170",
+      "I11:865;11:332;8:171",
+      "11:869",
+      "11:870",
+      "11:871",
+      "I11:871;11:335",
+      "I11:871;11:335;8:170",
+      "I11:871;11:335;8:171",
+      "11:875",
+      "11:876",
+      "11:877",
+      "I11:877;11:338",
+      "I11:877;11:338;8:170",
+      "I11:877;11:338;8:171",
+      "I11:877;11:341",
+      "11:882",
+      "11:883",
+      "11:884",
+      "I11:884;11:342",
+      "I11:884;11:342;8:170",
+      "I11:884;11:342;8:171",
+      "11:888",
+      "11:889",
+      "11:890",
+      "11:891",
+      "11:892",
+      "I11:892;11:382",
+      "11:894",
+      "11:895",
+      "11:896",
+      "I11:896;11:383",
+      "11:898",
+      "11:899",
+      "11:900",
+      "I11:900;11:384",
+      "11:902",
+      "11:903",
+      "11:904",
+      "I11:904;11:385",
+      "I11:904;11:386",
+      "11:907",
+      "11:908",
+      "11:909",
+      "I11:909;11:387",
+      "11:911",
+      "11:912",
+      "11:913",
+      "I11:913;11:388",
+      "11:915",
+      "11:916",
+      "11:917",
+      "11:918",
+      "I11:918;11:389",
+      "11:920",
+      "11:921",
+      "11:922",
+      "I11:922;11:390",
+      "11:924",
+      "11:925",
+      "11:926",
+      "I11:926;11:391",
+      "11:928",
+      "11:929",
+      "11:930",
+      "I11:930;11:392",
+      "I11:930;11:393",
+      "11:933",
+      "11:934",
+      "11:935",
+      "I11:935;11:394",
+      "11:937",
+      "11:938",
+      "11:939",
+      "I11:939;11:395",
+      "11:941",
+      "11:942",
+      "11:943",
+      "11:944",
+      "11:945",
+      "I11:945;11:431",
+      "11:947",
+      "11:948",
+      "11:949",
+      "I11:949;11:432",
+      "11:951",
+      "11:952",
+      "11:953",
+      "I11:953;11:433",
+      "11:955",
+      "11:956",
+      "11:957",
+      "I11:957;11:434",
+      "I11:957;11:435",
+      "11:960",
+      "11:961",
+      "11:962",
+      "I11:962;11:436",
+      "11:964",
+      "11:965",
+      "11:966",
+      "11:967",
+      "I11:967;11:437",
+      "11:969",
+      "11:970",
+      "11:971",
+      "I11:971;11:438",
+      "11:973",
+      "11:974",
+      "11:975",
+      "I11:975;11:439",
+      "11:977",
+      "11:978",
+      "11:979",
+      "I11:979;11:440",
+      "I11:979;11:441",
+      "11:982",
+      "11:983",
+      "11:984",
+      "I11:984;11:442",
+      "11:986",
+      "11:987",
+      "11:988",
+      "11:989",
+      "11:990",
+      "I11:990;11:470",
+      "I11:990;11:471",
+      "I11:990;11:472",
+      "11:994",
+      "11:995",
+      "11:996",
+      "I11:996;11:473",
+      "I11:996;11:474",
+      "I11:996;11:475",
+      "11:1000",
+      "11:1001",
+      "11:1002",
+      "I11:1002;11:476",
+      "I11:1002;11:477",
+      "I11:1002;11:478",
+      "11:1006",
+      "11:1007",
+      "11:1008",
+      "I11:1008;11:479",
+      "I11:1008;11:480",
+      "I11:1008;11:481",
+      "11:1012",
+      "11:1013",
+      "11:1014",
+      "I11:1014;11:482",
+      "I11:1014;11:483",
+      "I11:1014;11:484",
+      "11:1018",
+      "11:1019",
+      "11:1020",
+      "I11:1020;11:485",
+      "I11:1020;11:486",
+      "I11:1020;11:487",
+      "11:1024",
+      "11:1025",
+      "11:1026",
+      "11:1027",
+      "I11:1027;11:488",
+      "I11:1027;11:489",
+      "I11:1027;11:490",
+      "11:1031",
+      "11:1032",
+      "11:1033",
+      "I11:1033;11:491",
+      "I11:1033;11:492",
+      "I11:1033;11:493",
+      "11:1037",
+      "11:1038",
+      "11:1039",
+      "I11:1039;11:494",
+      "I11:1039;11:495",
+      "I11:1039;11:496",
+      "11:1043",
+      "11:1044",
+      "11:1045",
+      "I11:1045;11:497",
+      "I11:1045;11:498",
+      "I11:1045;11:499",
+      "11:1049",
+      "11:1050",
+      "11:1051",
+      "I11:1051;11:500",
+      "I11:1051;11:501",
+      "I11:1051;11:502",
+      "11:1055",
+      "11:1056",
+      "11:1057",
+      "I11:1057;11:503",
+      "I11:1057;11:504",
+      "I11:1057;11:505",
+      "11:1061",
+      "11:1062",
+      "11:1063",
+      "11:1064",
+      "11:1065",
+      "I11:1065;11:527",
+      "11:1067",
+      "11:1068",
+      "11:1069",
+      "I11:1069;11:528",
+      "11:1071",
+      "11:1072",
+      "11:1073",
+      "I11:1073;11:529",
+      "11:1075",
+      "11:1076",
+      "11:1077",
+      "I11:1077;11:530",
+      "11:1079",
+      "11:1080",
+      "11:1081",
+      "11:1082",
+      "I11:1082;11:531",
+      "11:1084",
+      "11:1085",
+      "11:1086",
+      "I11:1086;11:532",
+      "11:1088",
+      "11:1089",
+      "11:1090",
+      "I11:1090;11:533",
+      "11:1092",
+      "11:1093",
+      "11:1094",
+      "I11:1094;11:534",
+      "11:1096"
+    ]
+  }
+}
