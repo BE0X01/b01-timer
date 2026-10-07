@@ -3,7 +3,10 @@ using B01Timer.Core;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Reflection;
 using GlyphPath = System.Windows.Shapes.Path;
 
 internal static class Program
@@ -19,7 +22,8 @@ internal static class Program
         app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/B01Timer;component/Styles.xaml") });
         app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/B01Timer;component/Icons.xaml") });
         ThemeManager.Apply("dark");
-        var window = new MainWindow(new AppSettings { LastSeconds = 900 }, new SettingsStore(folder));
+        var settings = new AppSettings { LastSeconds = 900 };
+        var window = new MainWindow(settings, new SettingsStore(folder));
         try
         {
             window.Show(); window.UpdateLayout();
@@ -30,6 +34,7 @@ internal static class Program
             Check(new Typeface(start.FontFamily, start.FontStyle, start.FontWeight, start.FontStretch).TryGetGlyphTypeface(out var semiBold)
                 && semiBold.FontUri.OriginalString.Contains("pretendard-semibold.otf", StringComparison.OrdinalIgnoreCase), "Buttons resolve to the embedded Pretendard SemiBold font");
             Check(Typography.GetNumeralAlignment(numbers) == FontNumeralAlignment.Tabular, "Timer uses tabular digits to avoid changing digit widths");
+            VerifyClockLayout(window, settings, Check);
             var reset = (Button)window.FindName("ResetButton");
             var glyph = (GlyphPath)window.FindName("ResetIcon");
             Rect ink = glyph.Data.Bounds;
@@ -87,6 +92,132 @@ internal static class Program
             Console.WriteLine($"{checks} Windows appearance checks passed.");
         }
         finally { window.Close(); if (System.IO.Directory.Exists(folder)) System.IO.Directory.Delete(folder, true); }
+    }
+
+    private static void VerifyClockLayout(MainWindow window, AppSettings settings, Action<bool, string> check)
+    {
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
+        const int seconds = 12 * 3600 + 34 * 60 + 56;
+        var timer = (CountdownTimer)typeof(MainWindow).GetField("timer", flags)!.GetValue(window)!;
+        var clockField = typeof(CountdownTimer).GetField("clock", flags)!;
+        var originalClock = clockField.GetValue(timer);
+        var recorderField = typeof(MainWindow).GetField("recorder", flags)!;
+        var originalRecorder = recorderField.GetValue(window);
+        var originalRecords = settings.Records;
+        string originalSelection = settings.SelectedRecordId;
+        string originalTheme = ThemeManager.Current;
+        long awakeTicks = 0;
+        var record = new ProgramRecord { Id = "clock-layout", Title = "Clock layout", ExecutablePath = @"C:\QA\ClockLayout.exe", ElapsedTicks = seconds * TimeSpan.TicksPerSecond };
+        var recorder = new FocusRecorder(settings, () => awakeTicks);
+        // Freeze both clocks only for image comparison. The real dispatcher/clock
+        // regression below runs after these production dependencies are restored.
+        clockField.SetValue(timer, (Func<double>)(() => 0));
+        recorderField.SetValue(window, recorder);
+        settings.Records = [record]; settings.SelectedRecordId = record.Id;
+        ThemeManager.Apply("dark");
+        var start = (Button)window.FindName("StartPauseButton");
+        var editor = (DurationEditor)window.FindName("TimeEditor");
+        var snapshots = new Dictionary<string, ClockCapture>();
+        void Refresh() { typeof(MainWindow).GetMethod("UpdateDisplay", flags)!.Invoke(window, null); window.UpdateLayout(); }
+        void Click(string id) => ((Button)window.FindName(id)).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        ClockCapture Capture(string name)
+        {
+            Refresh();
+            var image = CaptureClock(window, name);
+            snapshots.Add(name, image);
+            return image;
+        }
+        try
+        {
+            typeof(MainWindow).GetMethod("RenderRecords", flags)!.Invoke(window, null);
+            start.Focus(); timer.Configure(seconds); Refresh();
+            var reference = Capture("timer-ready");
+            check(((TextBlock)window.FindName("StatusText")).Text == "Ready" && reference.InkBounds.All(r => !r.IsEmpty && r.Width > 30 && r.Height > 30), "Ready clock raster comparison contains real digit ink in all three fields");
+            Click("StartPauseButton");
+            var running = Capture("timer-running");
+            check(((TextBlock)window.FindName("StatusText")).Text == "Running" && timer.State == CountdownState.Running && reference.Pixels.SequenceEqual(running.Pixels), "Ready and Running have identical rendered digits, colons and labels at 12:34:56");
+            Click("StartPauseButton");
+            var paused = Capture("timer-paused");
+            check(((TextBlock)window.FindName("StatusText")).Text == "Paused" && timer.State == CountdownState.Paused && reference.Pixels.SequenceEqual(paused.Pixels), "Paused retains the exact Ready/Running glyph baseline and clock pixels");
+            Click("RecordTab");
+            var waiting = Capture("record-waiting");
+            check(((TextBlock)window.FindName("StatusText")).Text.StartsWith("Waiting for focus") && reference.Pixels.SequenceEqual(waiting.Pixels), "Record waiting shares the exact Timer clock pixels and label positions");
+            recorder.SetForeground(record.ExecutablePath); awakeTicks += TimeSpan.TicksPerMillisecond * 100; recorder.Tick();
+            var recording = Capture("record-recording");
+            check(((TextBlock)window.FindName("StatusText")).Text.StartsWith("Recording") && reference.Pixels.SequenceEqual(recording.Pixels), "Record recording preserves the same baseline, digit spacing, colons and labels");
+            Click("TimerTab"); Click("StartPauseButton");
+            var resumed = Capture("timer-resumed");
+            check(timer.State == CountdownState.Running && reference.Pixels.SequenceEqual(resumed.Pixels), "Switching back and resuming cannot move the clock ink");
+            Click("StartPauseButton"); editor.FocusField(TimeField.Hours);
+            var hours = (TextBox)editor.FindName("HoursInput");
+            var minutes = (TextBox)editor.FindName("MinutesInput");
+            var oldHoursCaret = hours.CaretBrush; var oldMinutesCaret = minutes.CaretBrush;
+            try
+            {
+                // Selection and caret are intentional editing decoration. Hide
+                // only the caret, collapse the selection, then measure glyph ink.
+                hours.CaretBrush = Brushes.Transparent; hours.Select(hours.Text.Length, 0);
+                var editingHours = Capture("timer-edit-hours");
+                check(hours.IsKeyboardFocused && reference.InkBounds.SequenceEqual(editingHours.InkBounds), "Focused two-digit Hours editing preserves the passive glyph ink bounds and baseline");
+                hours.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                minutes.CaretBrush = Brushes.Transparent; minutes.Select(minutes.Text.Length, 0);
+                var editingMinutes = Capture("timer-edit-minutes");
+                check(minutes.IsKeyboardFocused && reference.InkBounds.SequenceEqual(editingMinutes.InkBounds), "Tab traversal edits Minutes without shifting any digit ink");
+            }
+            finally { hours.CaretBrush = oldHoursCaret; minutes.CaretBrush = oldMinutesCaret; }
+            start.Focus(); editor.Commit();
+            var committed = Capture("timer-edit-committed");
+            check(!editor.IsEditing && reference.Pixels.SequenceEqual(committed.Pixels), "Leaving an unchanged editor restores the exact passive clock raster");
+            string output = ClockArtifactDirectory();
+            System.IO.File.WriteAllText(System.IO.Path.Combine(output, "ink-bounds.json"), System.Text.Json.JsonSerializer.Serialize(snapshots.ToDictionary(x => x.Key, x => x.Value.InkBounds.Select(r => new { r.X, r.Y, r.Width, r.Height })), new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+        }
+        finally
+        {
+            start.Focus(); editor.Commit();
+            clockField.SetValue(timer, originalClock); recorderField.SetValue(window, originalRecorder);
+            settings.Records = originalRecords; settings.SelectedRecordId = originalSelection;
+            typeof(MainWindow).GetMethod("RenderRecords", flags)!.Invoke(window, null);
+            timer.Configure(900); Click("TimerTab"); ThemeManager.Apply(originalTheme); Refresh();
+        }
+    }
+
+    private sealed record ClockCapture(byte[] Pixels, Int32Rect[] InkBounds);
+
+    private static string ClockArtifactDirectory()
+    {
+        string path = System.IO.Path.Combine(Environment.CurrentDirectory, "artifacts", "qa-ui", "clock-layout");
+        System.IO.Directory.CreateDirectory(path); return path;
+    }
+
+    private static ClockCapture CaptureClock(MainWindow window, string name)
+    {
+        var panel = (Border)window.FindName("TimerPanel");
+        Point origin = panel.TranslatePoint(new Point(), window);
+        // The 324-DIP clock is centered in the same panel. Include every digit,
+        // both colons and all unit labels, excluding status and the day badge.
+        var region = new Int32Rect((int)Math.Round(origin.X + (panel.ActualWidth - 324) / 2), (int)Math.Round(origin.Y + (panel.ActualHeight - 100) / 2), 324, 100);
+        var bitmap = new RenderTargetBitmap((int)Math.Ceiling(window.ActualWidth), (int)Math.Ceiling(window.ActualHeight), 96, 96, PixelFormats.Pbgra32);
+        bitmap.Render(window);
+        var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(bitmap));
+        using (var stream = System.IO.File.Create(System.IO.Path.Combine(ClockArtifactDirectory(), name + ".png"))) encoder.Save(stream);
+        byte[] pixels = new byte[region.Width * region.Height * 4];
+        bitmap.CopyPixels(region, pixels, region.Width * 4, 0);
+        // This matches the old 2-pixel regression's bright-ink measurement and
+        // ignores dark backgrounds, muted labels and the colored focus border.
+        var ink = new List<Int32Rect>();
+        foreach (int fieldLeft in new[] { 0, 116, 232 })
+        {
+            int left = int.MaxValue, top = int.MaxValue, right = -1, bottom = -1;
+            for (int y = 0; y < region.Height; y++) for (int x = fieldLeft; x < fieldLeft + 92; x++)
+            {
+                int offset = (y * region.Width + x) * 4;
+                if (pixels[offset] <= 210 || pixels[offset + 1] <= 210 || pixels[offset + 2] <= 210) continue;
+                left = Math.Min(left, x); top = Math.Min(top, y); right = Math.Max(right, x); bottom = Math.Max(bottom, y);
+            }
+            ink.Add(right < 0 ? Int32Rect.Empty : new Int32Rect(left, top, right - left + 1, bottom - top + 1));
+        }
+        Console.WriteLine($"TRACE {name} clock ink={string.Join(";", ink)}");
+        return new(pixels, ink.ToArray());
     }
 
     private static IEnumerable<DependencyObject> Descendants(DependencyObject root)

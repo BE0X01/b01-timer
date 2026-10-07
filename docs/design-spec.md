@@ -9,7 +9,7 @@ Timer.png의 위에서 아래로 내려오는 탭 → 시간 즐겨찾기 → �
 - 타이틀 바 아래 본문 좌우 padding 24. 상단 y=52, 높이 36: Timer/Record 탭 그룹 왼쪽, 테마 아이콘 버튼(36 × 36, glyph canvas 22) 오른쪽. 탭은 각각 92 × 36, 바깥 radius 10, 안쪽 radius 7.
 - 즐겨찾기 행 y=104, 높이 32. 칩 간격 8, 첫 칩부터 가로로 배치하고 끝에 +. 칩이 늘면 WrapPanel을 사용하고 창 본문을 수직으로 확장하거나 scroll하여 하단 버튼을 밀어내지 않게 한다. 기본 15/30/60분은 합리적인 초기값이고 이후 사용자 설정을 저장한다.
 - 시간 패널 y=156, 472 × 122, radius 16, 1 DIP border. 중앙에 3개의 클릭 가능한 시간 필드와 콜론 2개. 각 필드 width 92, 콜론 width 24. 숫자 baseline을 맞춘다.
-- 숫자: EXE에 내장한 Pretendard Regular 60, Normal. `Typography.NumeralAlignment="Tabular"`로 숫자 폭을 유지한다. UI의 Regular/SemiBold도 같은 Pretendard 폰트 자산을 사용한다. 중앙 정렬, selection highlight는 accent 배경. 숫자 아래 작은 `HOURS`, `MINUTES`, `SECONDS` 각각 9, letter spacing이 가능하면 1, muted. 콜론은 숫자보다 약간 어둡고 같은 baseline.
+- 숫자: EXE에 내장한 Pretendard Regular 60, Normal. `Typography.NumeralAlignment="Tabular"`로 숫자 폭을 유지한다. Timer의 대기·정지·실행·완료 및 Record의 대기·측정은 하나의 TextBlock 표시 트리로 숫자·콜론·라벨 위치를 공유한다. 각 숫자 칸 92, 콜론 칸 24, 숫자 행 74 DIP를 사용하고 숫자와 콜론은 동일한 폰트·행 상단 기준에 맞춘다. UI의 Regular/SemiBold도 같은 Pretendard 폰트 자산을 사용한다. 중앙 정렬, selection highlight는 accent 배경. 숫자 아래 작은 `HOURS`, `MINUTES`, `SECONDS` 각각 9, 상단 간격 3, muted. 콜론은 숫자보다 약간 어둡고 같은 baseline.
 - 하단 y=298: 좌측 상태 `Ready` / `Running` / `Paused` / `Time’s up` 12, 우측 Play/Pause 48 × 44 + 10 gap + Reset 44 × 44. 버튼 radius 12. 바깥 하단 padding 18.
 - 창 리사이즈 시 시간 패널이 가로 확장되고 내부 시간 row는 중앙 정렬한다. 주 액션은 우측 고정. height 변화에는 시간 패널 영역이 늘어나되 숫자를 불필요하게 커지게 하지 않는다.
 
@@ -54,7 +54,7 @@ Timer.png의 위에서 아래로 내려오는 탭 → 시간 즐겨찾기 → �
 - second 클릭 후 `123000` → `12:30:00`. 3-4자리면 MMSS이며 기존 hours를 보존하고, 5-6자리면 HHMMSS 전체를 바꾼다.
 - 짧은 입력을 `08`처럼 zero-pad 한다. 시는 두 자리 display로 최대 99이며, 분/초 overflow는 정규화한다(예: minute `90` → 기존시+1:30:현재초). 최종 duration 범위는 00:00:00–99:59:59. 범위를 넘는 입력은 확정하지 않고 조용한 오류문구로 알린다. 조용히 clamp하지 않는다.
 - 실행 중 시간 필드를 편집하기 시작하면 먼저 일시정지한다. 편집 확정은 새 duration으로 설정하고 대기 상태로 바뀐다. 실행 중 preset을 선택해도 새 duration을 설정하고 대기 상태가 된다.
-- Running의 숫자는 읽기 전용 TextBlock으로 갱신한다. 시·분·초를 클릭하면 일시정지하고 대응하는 입력 필드를 선택한다. Ready/Paused에서는 편집용 TextBox를 표시하며 숫자 입력의 IME는 비활성화한다. Record Title 입력은 IME를 사용할 수 있다.
+- 메인 숫자는 모든 비편집 상태에서 동일한 읽기 전용 TextBlock으로 표시한다. Ready/Paused의 native TextBox는 투명한 클릭·Tab 입력 영역으로 유지하다 실제 focus 때 해당 칸에만 편집 표시를 겹친다. Focus 테두리는 별도 장식으로 겹쳐 2자리 숫자의 baseline·위치를 밀지 않으며, 편집 중에도 칸·콜론·라벨의 위치와 전체 크기를 고정한다. Running의 시·분·초를 클릭하면 일시정지하고 대응하는 입력 필드를 선택한다. Running과 Record에서는 편집 control을 Collapsed하여 live clock이 IME/UIA text store를 갱신하지 않게 한다. 숫자 입력의 IME는 비활성화하며 Record Title 입력은 IME를 사용할 수 있다. Preset dialog의 기존 24 DIP 숫자·80 DIP 입력 칸은 유지한다.
 - Reset은 처음 실행한 duration이 아니라 '가장 최근에 사용자 입력 또는 칩으로 설정한 duration'으로 돌아가며 Ready 상태가 된다. Pause/Resume은 reset base를 바꾸지 않는다.
 - 시간입력, preset 추가/수정, 테마 상태는 실제 타이머 모델과 분리한다. preset dialog를 연 동안 실행 중 타이머는 계속 진행한다.
 

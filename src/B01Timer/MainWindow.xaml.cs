@@ -112,14 +112,13 @@ public partial class MainWindow : Window
     private void UpdateDisplay()
     {
         bool running = timer.State == CountdownState.Running;
-        // Keep the live clock separate from editable TextBoxes/IME/UIA text stores.
-        // Inputs receive values only when the countdown is paused or waiting.
+        // All modes use the same display tree. Inputs are transparent until focused,
+        // and are collapsed during live counting to avoid IME/UIA text-store updates.
         if (!running && !TimeEditor.IsEditing) TimeEditor.Seconds = timer.DisplaySeconds;
         TimeEditor.Visibility = recordView || running ? Visibility.Collapsed : Visibility.Visible;
-        RecordDisplay.Visibility = recordView || running ? Visibility.Visible : Visibility.Collapsed;
         foreach (var digit in new[] { RecordHours, RecordMinutes, RecordSeconds })
         { digit.IsHitTestVisible = !recordView; digit.Cursor = recordView ? Cursors.Arrow : Cursors.IBeam; }
-        if (running && !recordView) ShowClock(DurationInput.Format(timer.DisplaySeconds), "");
+        if (!recordView) ShowClock(DurationInput.Format(timer.DisplaySeconds), "");
         StartPauseIcon.Data = running ? pauseIcon : playIcon;
         string action = running ? "Pause timer" : "Start timer";
         StartPauseButton.ToolTip = action; AutomationProperties.SetName(StartPauseButton, action);
@@ -176,8 +175,8 @@ public partial class MainWindow : Window
     private void SwitchView(bool record)
     {
         Keyboard.ClearFocus(); TimeEditor.Commit(); recordView = record;
-        TimeEditor.Visibility = PresetsPanel.Visibility = StartPauseButton.Visibility = record ? Visibility.Collapsed : Visibility.Visible;
-        RecordDisplay.Visibility = RecordsPanel.Visibility = record ? Visibility.Visible : Visibility.Collapsed;
+        PresetsPanel.Visibility = StartPauseButton.Visibility = record ? Visibility.Collapsed : Visibility.Visible;
+        RecordsPanel.Visibility = record ? Visibility.Visible : Visibility.Collapsed;
         TimerTab.SetResourceReference(Button.BackgroundProperty, record ? "SurfaceBrush" : "RaisedBrush");
         RecordTab.SetResourceReference(Button.BackgroundProperty, record ? "RaisedBrush" : "SurfaceBrush");
         ResetButton.Margin = new Thickness(record ? 0 : 10, 0, 0, 0);

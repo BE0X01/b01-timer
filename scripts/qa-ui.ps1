@@ -116,7 +116,9 @@ function Enter-Field([string]$Id, [string]$Text, $Window = $script:Main, [string
 }
 
 function Get-Time($Window = $script:Main, [string]$Prefix = '') {
-    if (-not $Prefix -and (Find-Element $Window 'StatusText').Current.Name -eq 'Running') {
+    # Main uses the same visible clock in Ready, Paused, Running and Record.
+    # TextBox values remain available for editing and preset dialogs only.
+    if (-not $Prefix -and $Window -eq $script:Main) {
         return "$( (Get-Control 'RecordHours' $Window).Current.Name ):$( (Get-Control 'RecordMinutes' $Window).Current.Name ):$( (Get-Control 'RecordSeconds' $Window).Current.Name )"
     }
     return "$(Get-Value ($Prefix + 'HoursInput') $Window):$(Get-Value ($Prefix + 'MinutesInput') $Window):$(Get-Value ($Prefix + 'SecondsInput') $Window)"
@@ -205,6 +207,22 @@ try {
     Wait-Result { Test-Path $overrideIni } | Out-Null
     Check (Test-Path $overrideIni) 'Settings override creates B01Timer.ini in the requested test folder'
     Check ((Get-Control 'RecordTab').Current.IsEnabled) 'Record is enabled'
+    Set-Time '123456'
+    Capture-Window 'clock-timer-ready'
+    Click-Button 'RecordHours'
+    Check ((Get-Control 'HoursInput').Current.HasKeyboardFocus) 'Clicking passive Hours focuses the matching editable field'
+    [System.Windows.Forms.SendKeys]::SendWait('^a12{TAB}')
+    Check ((Get-Control 'MinutesInput').Current.HasKeyboardFocus) 'Tab moves from Hours to Minutes and commits the field'
+    [System.Windows.Forms.SendKeys]::SendWait('^a34{TAB}^a56{ENTER}')
+    Check-Time '12:34:56' 'Tab and Enter commit through all three transparent clock input targets'
+    Press-Button 'StartPauseButton'; Wait-Status 'Running'
+    Capture-Window 'clock-timer-running'
+    Press-Button 'StartPauseButton'; Wait-Status 'Paused'
+    Capture-Window 'clock-timer-paused'
+    Press-Button 'StartPauseButton'; Wait-Status 'Running'
+    Click-Button 'RecordMinutes'
+    Check ((Get-Status) -eq 'Paused' -and (Get-Control 'MinutesInput').Current.HasKeyboardFocus) 'Clicking a running clock pauses and focuses Minutes for editing'
+    [System.Windows.Forms.SendKeys]::SendWait('{ESC}')
     Set-Time '000000'
     Check (-not (Get-Control 'StartPauseButton').Current.IsEnabled) 'Zero seconds cannot start'
     Enter-Field 'MinutesInput' '20' $script:Main ''
