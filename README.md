@@ -4,6 +4,13 @@ A portable Windows countdown timer and automatic foreground time recorder with r
 
 [Download the latest release](https://github.com/BE0X01/b01-timer/releases/latest)
 
+## Preview
+
+<p align="center">
+  <img src="docs/preview-timer.png" width="49%" alt="B01 Timer Timer preview">
+  <img src="docs/preview-record.png" width="49%" alt="B01 Timer Record preview">
+</p>
+
 ## Features
 
 - Editable hours, minutes and seconds, with reusable countdown presets.
