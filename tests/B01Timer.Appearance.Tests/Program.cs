@@ -51,7 +51,7 @@ internal static class Program
             window.UpdateLayout();
             Check(Math.Abs(RenderedSize(play) - RenderedSize(glyph)) < 0.05 && (IconCenter(play) - start.TransformToAncestor(window).Transform(new Point(start.ActualWidth / 2, start.ActualHeight / 2))).Length < 0.05, "Filled Pause matches Reset size and is centered");
             var frame = new System.Windows.Threading.DispatcherFrame();
-            var wait = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1250) };
+            var wait = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.Send) { Interval = TimeSpan.FromMilliseconds(1250) };
             wait.Tick += (_, _) => { wait.Stop(); frame.Continue = false; }; wait.Start(); System.Windows.Threading.Dispatcher.PushFrame(frame);
             Check(((DurationEditor)window.FindName("TimeEditor")).Seconds < 900, "Timer refresh pulse advances with the foreground monitor initialized");
             ((Button)window.FindName("RecordTab")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); window.UpdateLayout();
