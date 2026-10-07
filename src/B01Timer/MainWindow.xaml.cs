@@ -47,11 +47,15 @@ public partial class MainWindow : Window
         pulse.Tick += (_, _) =>
         {
             if (diagnosticTicks++ < 3) App.Diagnostic?.Invoke("pulse " + diagnosticTicks + " editing=" + TimeEditor.IsEditing + " remaining=" + timer.RemainingSeconds);
-            foreground?.Sample(); recorder.Tick();
             if (timer.Tick()) { alarm.Play(); FlashWindow(new WindowInteropHelper(this).Handle, false); }
-            long now = ForegroundPrograms.AwakeTicks();
-            if (now - lastRecordSave >= TimeSpan.TicksPerSecond && settings.Records.Sum(r => (decimal)r.ElapsedTicks) != savedTotalTicks)
-            { SaveSettings(); lastRecordSave = now; }
+            if (settings.Records.Count > 0)
+            {
+                foreground?.Sample(); recorder.Tick();
+                long now = ForegroundPrograms.AwakeTicks();
+                if (now - lastRecordSave >= TimeSpan.TicksPerSecond && settings.Records.Sum(r => (decimal)r.ElapsedTicks) != savedTotalTicks)
+                { SaveSettings(); lastRecordSave = now; }
+            }
+            if (diagnosticTicks % 20 == 0) App.Diagnostic?.Invoke("pulse " + diagnosticTicks + " editing=" + TimeEditor.IsEditing + " remaining=" + timer.RemainingSeconds + " state=" + timer.State);
             UpdateDisplay();
         };
         Loaded += (_, _) =>

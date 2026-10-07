@@ -39,6 +39,7 @@ jobs:
           if ($version -notmatch '^\d+\.\d+(?:\.\d+)?(?:-[A-Za-z0-9.-]+)?$') { throw 'Invalid release version.' }
           "release_version=$version" | Add-Content -Encoding utf8 $env:GITHUB_OUTPUT
       - name: Test and build standalone EXE
+        id: build
         timeout-minutes: 4
         shell: pwsh
         run: ./scripts/build.ps1
@@ -46,6 +47,7 @@ jobs:
         shell: powershell
         run: ./scripts/qa-ui.ps1 -ExePath ./artifacts/publish/B01Timer.exe
       - name: Verify foreground program recording
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         shell: powershell
         run: ./scripts/qa-record.ps1 -ExePath ./artifacts/publish/B01Timer.exe
       - name: Package and check release files

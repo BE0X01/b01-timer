@@ -2,7 +2,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Interop;
-using System.Windows.Threading;
 
 namespace B01Timer;
 
@@ -14,10 +13,7 @@ public sealed record RunningProgram(string ExecutablePath, string WindowTitle)
 // No keyboard input, document contents, or window titles are persisted.
 public sealed class ForegroundPrograms : IDisposable
 {
-    private delegate void WinEventProc(IntPtr hook, uint evt, IntPtr hwnd, int objectId, int childId, uint thread, uint time);
     private delegate bool EnumWindowsProc(IntPtr hwnd, IntPtr parameter);
-    private readonly WinEventProc callback;
-    private readonly IntPtr hook;
     private readonly HwndSource source;
     private readonly IntPtr window;
     private bool locked;
@@ -28,9 +24,6 @@ public sealed class ForegroundPrograms : IDisposable
     {
         this.window = window;
         source = HwndSource.FromHwnd(window)!;
-        // Native callbacks may be reentrant. Deliver focus sampling through WPF.
-        callback = (_, _, _, _, _, _, _) => source.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(Sample));
-        hook = SetWinEventHook(3, 3, IntPtr.Zero, callback, 0, 0, 0);
         source.AddHook(SessionMessage);
         WTSRegisterSessionNotification(window, 0);
     }
@@ -92,11 +85,7 @@ public sealed class ForegroundPrograms : IDisposable
         disposed = true;
         WTSUnRegisterSessionNotification(window);
         if (!source.IsDisposed) source.RemoveHook(SessionMessage);
-        if (hook != IntPtr.Zero) UnhookWinEvent(hook);
-        GC.KeepAlive(callback);
     }
-    [DllImport("user32.dll")] private static extern IntPtr SetWinEventHook(uint min, uint max, IntPtr module, WinEventProc callback, uint process, uint thread, uint flags);
-    [DllImport("user32.dll")] private static extern bool UnhookWinEvent(IntPtr hook);
     [DllImport("user32.dll")] private static extern IntPtr GetForegroundWindow();
     [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
     [DllImport("kernel32.dll")] private static extern IntPtr OpenProcess(uint access, bool inherit, uint processId);
