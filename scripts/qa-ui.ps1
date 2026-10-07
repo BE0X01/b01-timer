@@ -282,6 +282,11 @@ try {
     Capture-Window 'alternate-theme-dialog' $dialog
     Press-Button 'PresetCancelButton' $dialog
     Check (@(Get-Presets).Count -eq $beforeCount + 1) 'Canceling Add preserves existing presets'
+    Press-Button 'AddPresetButton'
+    $dialog = Wait-Result { Find-Window 'Add preset' }
+    Enter-Field 'PresetSecondsInput' '000055' $dialog '{ESC}'
+    Check ($null -eq (Find-Window 'Add preset')) 'Escape from an edited modal field cancels the dialog'
+    Check (@(Get-Presets).Count -eq $beforeCount + 1) 'Escape cancellation preserves existing presets'
     Stop-App
     Start-App
     Check ((Get-Control 'ThemeButton').Current.Name -eq $themeAfter) 'Theme survives relaunch'

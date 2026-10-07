@@ -18,6 +18,7 @@ public partial class DurationEditor : UserControl
     public event Action<int>? DurationChanged;
     public event Action<string>? ValidationChanged;
     public event Action? EnterCommitted;
+    public event Action? EscapeCanceled;
     public bool IsEditing => editing is not null;
     public bool HasPositivePendingInput => editing is not null && DurationInput.TryApply(editing.Text, Enum.Parse<TimeField>((string)editing.Tag), editBase, out int value) && value > 0;
     public double NumberSize { get; set; } = 60;
@@ -75,7 +76,7 @@ public partial class DurationEditor : UserControl
     private void KeyDownInField(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Enter) { bool valid = Commit(); Keyboard.ClearFocus(); if (valid) EnterCommitted?.Invoke(); e.Handled = true; }
-        else if (e.Key == Key.Escape) { editing = null; seconds = editBase; UpdateFields(); ClearValidation(); Keyboard.ClearFocus(); e.Handled = true; }
+        else if (e.Key == Key.Escape) { editing = null; seconds = editBase; UpdateFields(); ClearValidation(); Keyboard.ClearFocus(); EscapeCanceled?.Invoke(); e.Handled = true; }
         else if (e.Key == Key.Space) e.Handled = true;
     }
     public void FocusMinutes() { MinutesInput.Focus(); MinutesInput.SelectAll(); }

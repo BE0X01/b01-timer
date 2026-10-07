@@ -13,6 +13,7 @@ public partial class PresetWindow : Window
         PresetEditor.NumberSize = 24; PresetEditor.FieldWidth = 80; PresetEditor.AutomationPrefix = "Preset"; PresetEditor.Seconds = initialSeconds;
         PresetEditor.ValidationChanged += message => ErrorText.Text = message;
         PresetEditor.EnterCommitted += () => Save_Click(this, new());
+        PresetEditor.EscapeCanceled += () => DialogResult = false;
         Loaded += (_, _) => PresetEditor.FocusMinutes();
     }
     private void Save_Click(object sender, RoutedEventArgs e)
