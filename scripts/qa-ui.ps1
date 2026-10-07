@@ -110,6 +110,23 @@ function Time-Seconds([string]$Time) {
     return 3600 * [int]$parts[0] + 60 * [int]$parts[1] + [int]$parts[2]
 }
 
+function Get-Status { return (Get-Control 'StatusText').Current.Name }
+
+function Wait-Status([string]$Expected) {
+    try { Wait-Result { (Get-Status) -eq $Expected } 6000 | Out-Null }
+    catch { throw "Expected status=$Expected; displayed=$(Get-Time); status=$(Get-Status). $($_.Exception.Message)" }
+}
+
+function Wait-Time-Decrease([int]$Before) {
+    try {
+        return Wait-Result {
+            $remaining = Time-Seconds (Get-Time)
+            if ($remaining -lt $Before -and $remaining -gt 0) { return $remaining }
+            return $false
+        } 6000
+    } catch { throw "Countdown did not decrease from $Before within 6 seconds; displayed=$(Get-Time); status=$(Get-Status). $($_.Exception.Message)" }
+}
+
 function Check([bool]$Passed, [string]$Name, [string]$Detail = '') {
     $script:Results.Add([pscustomobject]@{ name = $Name; passed = $Passed; detail = $Detail })
     if (-not $Passed) { throw "FAIL $Name $Detail" }
@@ -172,6 +189,7 @@ try {
     Check (-not (Get-Control 'StartPauseButton').Current.IsEnabled) 'Zero seconds cannot start'
     Enter-Field 'MinutesInput' '20' $script:Main ''
     Click-Button 'StartPauseButton'
+    Wait-Status 'Running'
     Check ((Get-Control 'StartPauseButton').Current.Name -eq 'Pause timer') 'Valid edit from zero starts through immediate mouse click'
     Press-Button 'ResetButton'
     Check-Time '00:20:00' 'Immediate Start commits edited duration as Reset baseline'
@@ -210,16 +228,18 @@ try {
 
     Set-Time '000015'
     Press-Button 'StartPauseButton'
-    Start-Sleep -Milliseconds 1300
-    $running = Time-Seconds (Get-Time)
-    Check ($running -lt 15 -and $running -gt 0) 'Countdown runs'
+    Wait-Status 'Running'
+    $running = Wait-Time-Decrease 15
+    Check ($running -lt 15 -and $running -gt 0) 'Countdown runs' "displayed=$(Get-Time); status=$(Get-Status)"
     Press-Button 'StartPauseButton'
+    Wait-Status 'Paused'
     $paused = Get-Time
     Start-Sleep -Milliseconds 1200
     Check-Time $paused 'Pause freezes countdown'
     Press-Button 'StartPauseButton'
-    Start-Sleep -Milliseconds 1300
-    Check ((Time-Seconds (Get-Time)) -lt (Time-Seconds $paused)) 'Resume continues countdown'
+    Wait-Status 'Running'
+    $resumed = Wait-Time-Decrease (Time-Seconds $paused)
+    Check ($resumed -lt (Time-Seconds $paused)) 'Resume continues countdown' "displayed=$(Get-Time); status=$(Get-Status)"
     Press-Button 'ResetButton'
     Check-Time '00:00:15' 'Reset restores configured duration'
     Start-Sleep -Milliseconds 1200
@@ -242,12 +262,13 @@ try {
 
     Set-Time '000015'
     Press-Button 'StartPauseButton'
+    Wait-Status 'Running'
     $beforeDialog = Time-Seconds (Get-Time)
     $beforeCount = @(Get-Presets).Count
     Press-Button 'AddPresetButton'
     $dialog = Wait-Result { Find-Window 'Add preset' }
-    Start-Sleep -Milliseconds 1300
-    Check ((Time-Seconds (Get-Time)) -lt $beforeDialog) 'Countdown continues with preset dialog open'
+    $duringDialog = Wait-Time-Decrease $beforeDialog
+    Check ($duringDialog -lt $beforeDialog) 'Countdown continues with preset dialog open' "displayed=$(Get-Time); status=$(Get-Status)"
     Capture-Window 'add-dialog' $dialog
     Enter-Field 'PresetSecondsInput' '999999' $dialog ''
     Click-Button 'PresetSaveButton' $dialog

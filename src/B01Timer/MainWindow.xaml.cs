@@ -96,7 +96,7 @@ public partial class MainWindow : Window
         }
         var add = new Button { Width = 32, Height = 32, Padding = new Thickness(8), Style = (Style)FindResource("ButtonBase"), Background = Brushes.Transparent, BorderThickness = new Thickness(1), ToolTip = "Add preset" };
         add.SetResourceReference(Button.BorderBrushProperty, "BorderBrush");
-        var glyph = new Path { Data = (Geometry)FindResource("IconAdd") }; glyph.SetResourceReference(Path.FillProperty, "MutedBrush"); add.Content = new Viewbox { Width = 16, Height = 16, Child = glyph };
+        var glyph = new Path { Width = 24, Height = 24, Data = (Geometry)FindResource("IconAdd"), StrokeThickness = 1.5, StrokeStartLineCap = PenLineCap.Round, StrokeEndLineCap = PenLineCap.Round }; glyph.SetResourceReference(Path.StrokeProperty, "MutedBrush"); add.Content = new Viewbox { Width = 16, Height = 16, Child = glyph };
         AutomationProperties.SetName(add, "Add preset"); AutomationProperties.SetAutomationId(add, "AddPresetButton");
         add.Click += (_, _) => OpenPreset(null); PresetsPanel.Children.Add(add);
     }
