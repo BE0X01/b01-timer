@@ -44,7 +44,7 @@ public partial class DurationEditor : UserControl
     private void ApplySizing()
     {
         foreach (var box in Boxes) { box.Width = FieldWidth; box.Height = NumberSize + 14; box.FontSize = NumberSize; }
-        foreach (var colon in new[] { ColonOne, ColonTwo }) { colon.Width = NumberSize > 30 ? 24 : 16; colon.FontSize = NumberSize; colon.Height = NumberSize + 14; }
+        foreach (var colon in new[] { ColonOne, ColonTwo }) { colon.Width = NumberSize > 30 ? 24 : 16; colon.FontSize = NumberSize; }
     }
     private void UpdateFields()
     {

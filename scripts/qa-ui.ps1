@@ -51,7 +51,8 @@ function Find-Window([string]$Name = '') {
     $conditions.Add([System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::Window))
     if ($Name) { $conditions.Add([System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::NameProperty, $Name)) }
     $condition = [System.Windows.Automation.AndCondition]::new($conditions.ToArray())
-    return [System.Windows.Automation.AutomationElement]::RootElement.FindFirst([System.Windows.Automation.TreeScope]::Children, $condition)
+    # WPF owned modal windows can be nested under the owner in the UIA tree.
+    return [System.Windows.Automation.AutomationElement]::RootElement.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $condition)
 }
 
 function Start-App {
@@ -200,6 +201,12 @@ try {
     Check-Time '01:12:34' 'Invalid edit followed by actual Start click restores previous value'
     Start-Sleep -Milliseconds 1200
     Check-Time '01:12:34' 'Invalid edit followed by Start click cannot launch previous duration'
+    $transform = $script:Main.GetCurrentPattern([System.Windows.Automation.TransformPattern]::Pattern)
+    $transform.Resize(460, 340)
+    Start-Sleep -Milliseconds 250
+    Capture-Window 'min-size-validation'
+    $transform.Resize(520, 360)
+    Start-Sleep -Milliseconds 250
 
     Set-Time '000015'
     Press-Button 'StartPauseButton'
@@ -255,6 +262,7 @@ try {
     Check-Time '00:00:17' 'New preset configures its duration'
     Open-Context (Preset-Named '00:00:17')
     Check ($null -ne (Get-MenuItem 'Edit') -and $null -ne (Get-MenuItem 'Remove')) 'Preset context exposes Edit and Remove'
+    Capture-Window 'preset-menu'
     Invoke-Control (Get-MenuItem 'Edit')
     $dialog = Wait-Result { Find-Window 'Edit preset' }
     Enter-Field 'PresetSecondsInput' '000019' $dialog
@@ -269,6 +277,11 @@ try {
     $themeAfter = (Get-Control 'ThemeButton').Current.Name
     Check ($themeAfter -ne $themeBefore) 'Theme toggle changes its accessible action'
     Capture-Window 'theme-toggled'
+    Press-Button 'AddPresetButton'
+    $dialog = Wait-Result { Find-Window 'Add preset' }
+    Capture-Window 'alternate-theme-dialog' $dialog
+    Press-Button 'PresetCancelButton' $dialog
+    Check (@(Get-Presets).Count -eq $beforeCount + 1) 'Canceling Add preserves existing presets'
     Stop-App
     Start-App
     Check ((Get-Control 'ThemeButton').Current.Name -eq $themeAfter) 'Theme survives relaunch'
@@ -288,6 +301,16 @@ try {
     Write-Output "$($script:Results.Count) independent UI checks passed."
 } catch {
     $script:Results.Add([pscustomobject]@{ name = 'Unhandled test failure'; passed = $false; detail = $_.Exception.ToString() })
+    if ($null -ne $script:Process) {
+        try {
+            $condition = [System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ProcessIdProperty, $script:Process.Id)
+            $elements = [System.Windows.Automation.AutomationElement]::RootElement.FindAll([System.Windows.Automation.TreeScope]::Descendants, $condition)
+            $tree = foreach ($element in $elements) {
+                [pscustomobject]@{ name = $element.Current.Name; id = $element.Current.AutomationId; type = $element.Current.ControlType.ProgrammaticName; enabled = $element.Current.IsEnabled }
+            }
+            $tree | ConvertTo-Json -Depth 4 | Set-Content -Encoding UTF8 (Join-Path $ArtifactDirectory 'uia-tree.json')
+        } catch { Write-Warning $_ }
+    }
     if ($null -ne $script:Main) { try { Capture-Window 'failure' } catch { Write-Warning $_ } }
     throw
 } finally {

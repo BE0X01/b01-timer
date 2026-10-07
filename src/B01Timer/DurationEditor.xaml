@@ -3,11 +3,16 @@
     <Style TargetType="TextBox"><Setter Property="Foreground" Value="{DynamicResource TextBrush}"/><Setter Property="Background" Value="Transparent"/><Setter Property="BorderBrush" Value="Transparent"/><Setter Property="BorderThickness" Value="0"/><Setter Property="SelectionBrush" Value="{DynamicResource AccentBrush}"/><Setter Property="SelectionOpacity" Value="0.5"/><Setter Property="CaretBrush" Value="{DynamicResource AccentBrush}"/><Setter Property="FontFamily" Value="Consolas"/><Setter Property="Padding" Value="0"/><Setter Property="HorizontalContentAlignment" Value="Center"/><Setter Property="VerticalContentAlignment" Value="Center"/><Setter Property="FocusVisualStyle" Value="{x:Null}"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TextBox"><Border x:Name="Outline" CornerRadius="8" Background="{TemplateBinding Background}" BorderBrush="Transparent" BorderThickness="2"><ScrollViewer x:Name="PART_ContentHost"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Outline" Property="Background" Value="{DynamicResource RaisedBrush}"/></Trigger><Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Outline" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style>
     <Style TargetType="TextBlock" x:Key="Label"><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="FontSize" Value="9"/><Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/><Setter Property="HorizontalAlignment" Value="Center"/><Setter Property="Margin" Value="0,3,0,0"/></Style>
   </UserControl.Resources>
-  <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-    <StackPanel><TextBox x:Name="HoursInput" Tag="Hours" AutomationProperties.Name="Hours" ToolTip="Hours — enter 40 for 40 hours"/><TextBlock Text="HOURS" Style="{StaticResource Label}"/></StackPanel>
-    <TextBlock x:Name="ColonOne" Text=":" FontFamily="Consolas" Foreground="{DynamicResource MutedBrush}" TextAlignment="Center" VerticalAlignment="Top"/>
-    <StackPanel><TextBox x:Name="MinutesInput" Tag="Minutes" AutomationProperties.Name="Minutes" ToolTip="Minutes — enter 408 for 04:08"/><TextBlock Text="MINUTES" Style="{StaticResource Label}"/></StackPanel>
-    <TextBlock x:Name="ColonTwo" Text=":" FontFamily="Consolas" Foreground="{DynamicResource MutedBrush}" TextAlignment="Center" VerticalAlignment="Top"/>
-    <StackPanel><TextBox x:Name="SecondsInput" Tag="Seconds" AutomationProperties.Name="Seconds" ToolTip="Seconds — enter 123000 for 12:30:00"/><TextBlock Text="SECONDS" Style="{StaticResource Label}"/></StackPanel>
-  </StackPanel>
+  <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <TextBox x:Name="HoursInput" Grid.Column="0" Tag="Hours" AutomationProperties.Name="Hours" ToolTip="Hours — enter 40 for 40 hours"/>
+    <TextBlock Grid.Row="1" Grid.Column="0" Text="HOURS" Style="{StaticResource Label}"/>
+    <TextBlock x:Name="ColonOne" Grid.Column="1" Text=":" FontFamily="Consolas" Foreground="{DynamicResource MutedBrush}" TextAlignment="Center" VerticalAlignment="Center"/>
+    <TextBox x:Name="MinutesInput" Grid.Column="2" Tag="Minutes" AutomationProperties.Name="Minutes" ToolTip="Minutes — enter 408 for 04:08"/>
+    <TextBlock Grid.Row="1" Grid.Column="2" Text="MINUTES" Style="{StaticResource Label}"/>
+    <TextBlock x:Name="ColonTwo" Grid.Column="3" Text=":" FontFamily="Consolas" Foreground="{DynamicResource MutedBrush}" TextAlignment="Center" VerticalAlignment="Center"/>
+    <TextBox x:Name="SecondsInput" Grid.Column="4" Tag="Seconds" AutomationProperties.Name="Seconds" ToolTip="Seconds — enter 123000 for 12:30:00"/>
+    <TextBlock Grid.Row="1" Grid.Column="4" Text="SECONDS" Style="{StaticResource Label}"/>
+  </Grid>
 </UserControl>
