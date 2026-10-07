@@ -38,7 +38,14 @@ function Invoke([string]$Id, $Window = $script:main) {
     Start-Sleep -Milliseconds 150
 }
 function Window-Named([string]$Name) {
-    return Wait-For { [System.Windows.Automation.AutomationElement]::RootElement.FindFirst([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.AndCondition]::new([System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ProcessIdProperty, $script:app.Id), [System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::NameProperty, $Name))) }
+    return Wait-For {
+        $conditions = [System.Windows.Automation.Condition[]]@(
+            [System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ProcessIdProperty, $script:app.Id),
+            [System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::Window),
+            [System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::NameProperty, $Name)
+        )
+        [System.Windows.Automation.AutomationElement]::RootElement.FindFirst([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.AndCondition]::new($conditions))
+    }
 }
 function Start-App {
     $script:app = Start-Process $ExePath -ArgumentList @('--settings-dir', ('"' + $settingsDirectory + '"')) -PassThru
