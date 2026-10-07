@@ -25,7 +25,12 @@
     "src/B01Timer/MainWindow.xaml",
     "src/B01Timer/MainWindow.xaml.cs",
     "src/B01Timer/PresetWindow.xaml",
-    "src/B01Timer/PresetWindow.xaml.cs"
+    "src/B01Timer/PresetWindow.xaml.cs",
+    "src/B01Timer/RecordWindow.xaml",
+    "src/B01Timer/RecordWindow.xaml.cs",
+    "src/B01Timer/ForegroundPrograms.cs",
+    "src/B01Timer.Core/FocusRecorder.cs",
+    "src/B01Timer.Core/SettingsStore.cs"
   ],
   "themeStrategy": {
     "type": "separate-collections",
@@ -3015,6 +3020,9 @@
     "reset": "Ink center normalized to (12,12) within 24px canvas",
     "alarm": "Two three-beep phrases; stops on Reset/configure",
     "figmaSync": "Pending; existing IDs/variants are the prior snapshot, not current implementation values",
-    "resumeScript": "Requires updating to current implementation before execution"
+    "resumeScript": "Requires updating to current implementation before execution",
+    "record": "Enabled Timer/Record tabs; up to five foreground executables; title chips, Add/Edit program dialog, reset-only actions, 1d / 1w 1d fixed-overlay badge; sources MainWindow, RecordWindow, FocusRecorder, ForegroundPrograms and SettingsStore",
+    "actionIcons": "Play/Pause/Reset all 20 DIP canvases; matched maximum ink diameter and button center",
+    "themeButton": "36 x 36 DIP; 22 DIP centered glyph canvas"
   }
 }

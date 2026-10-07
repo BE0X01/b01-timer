@@ -41,7 +41,7 @@ Timer.png의 위에서 아래로 내려오는 탭 → 시간 즐겨찾기 → �
 - +: 32 × 32 원형 또는 radius16, border 1, 16px `add` outline. tooltip `Add preset`.
 - preset 오른쪽 클릭: `Edit`, `Remove` 메뉴. 각각 최소 높이32, 좌우 padding12, 모서리 radius8, surface+border. Remove는 error 텍스트만 사용하고 즉시 제거한다. 활성 시간은 preset 제거와 무관하게 그대로 남아야 한다.
 - Play/Pause: accent solid 배경, accent foreground 20px canvas icon (Play outline / Pause filled), hover accent-hover. 0초에서는 비활성. tooltip/accessibility name을 `Start timer` / `Pause timer`로 바꾼다. Reset: raised 배경, main-text outline. 실제 geometry의 ink center를 24px canvas 중심에 맞춰 배치, tooltip `Reset timer`.
-- 테마 버튼: 배경 투명, hover surface, 18px outline. 현재 Dark일 때 sun(전환 목적 Light), 현재 Light일 때 moon(전환 목적 Dark). tooltip도 `Switch to light theme` / `Switch to dark theme`로 전환한다.
+- 테마 버튼: 36 × 36, 배경 투명, hover surface, 22 DIP canvas의 outline glyph. 현재 Dark일 때 sun(전환 목적 Light), 현재 Light일 때 moon(전환 목적 Dark). tooltip도 `Switch to light theme` / `Switch to dark theme`로 전환한다.
 - Running: status 앞 accent 작은 점 5px, Pause 아이콘. 숫자는 동일 색상. Paused: muted status, Play 아이콘. 완료: `00:00:00`, `Time’s up`, Play로 전환. 너무 큰 완료 팝업은 만들지 않고 세 음(짧음·짧음·길음) 묶음을 두 번 재생한다. 묶음 사이에 380ms를 두고, Reset/새 시간 설정/재시작/창 닫기는 재생을 중단한다.
 
 ## 시간 편집과 행동 계약
@@ -54,6 +54,7 @@ Timer.png의 위에서 아래로 내려오는 탭 → 시간 즐겨찾기 → �
 - second 클릭 후 `123000` → `12:30:00`. 3-4자리면 MMSS이며 기존 hours를 보존하고, 5-6자리면 HHMMSS 전체를 바꾼다.
 - 짧은 입력을 `08`처럼 zero-pad 한다. 시는 두 자리 display로 최대 99이며, 분/초 overflow는 정규화한다(예: minute `90` → 기존시+1:30:현재초). 최종 duration 범위는 00:00:00–99:59:59. 범위를 넘는 입력은 확정하지 않고 조용한 오류문구로 알린다. 조용히 clamp하지 않는다.
 - 실행 중 시간 필드를 편집하기 시작하면 먼저 일시정지한다. 편집 확정은 새 duration으로 설정하고 대기 상태로 바뀐다. 실행 중 preset을 선택해도 새 duration을 설정하고 대기 상태가 된다.
+- Running의 숫자는 읽기 전용 TextBlock으로 갱신한다. 시·분·초를 클릭하면 일시정지하고 대응하는 입력 필드를 선택한다. Ready/Paused에서는 편집용 TextBox를 표시하며 숫자 입력의 IME는 비활성화한다. Record Title 입력은 IME를 사용할 수 있다.
 - Reset은 처음 실행한 duration이 아니라 '가장 최근에 사용자 입력 또는 칩으로 설정한 duration'으로 돌아가며 Ready 상태가 된다. Pause/Resume은 reset base를 바꾸지 않는다.
 - 시간입력, preset 추가/수정, 테마 상태는 실제 타이머 모델과 분리한다. preset dialog를 연 동안 실행 중 타이머는 계속 진행한다.
 
@@ -96,5 +97,5 @@ SVG 자산은 src/B01Timer/Assets에 있다. Filled Pause는 기존 Outline glyp
 - 24시간 후 작은 1d 표시와 함께 시·분·초가 00:00:00으로 돌아간다. 7일은 1w, 8일은 1w 1d다. badge는 기존 Grid 안 좌측 상단의 overlay이고 새 행·열·margin을 만들지 않는다.
 - Reset/Play/Pause는 24-unit canvas 안에서 실제 ink의 최대 직경을 Reset에 맞추고 20 DIP Viewbox로 표시한다. 세 glyph의 ink center를 버튼 center에 맞춘다. 테마 버튼은 36 × 36, glyph canvas 22 × 22다.
 - 전경 HWND의 실행 파일 전체 경로를 대소문자 구분 없이 비교한다. 같은 프로그램의 여러 창이나 재실행은 같은 기록을 사용한다. 독립적인 실행 파일 경로의 프로그램을 5개까지 등록할 수 있다. 탭이나 표시할 칩은 측정 조건에 포함되지 않는다.
-- 누적은 100ns tick 단위로 보관하고 표시에서만 초를 내린다. Windows awake clock을 사용하며 sleep/hibernation을 제외한다. 세션 잠금 시 포커스를 해제한다. 앱 종료 중에는 기록하지 않는다.
+- 누적은 100ns tick 단위로 보관하고 표시에서만 초를 내린다. Windows awake clock을 사용하며 sleep/hibernation을 제외한다. 세션 잠금 시 WM_WTSSESSION_CHANGE 알림으로 포커스를 해제한다. 전경 프로그램은 50ms마다 확인한다. System.Threading.Timer 신호를 중복 없이 UI Dispatcher에 전달하고 모든 모델 변경과 화면 갱신은 UI thread에서 수행한다. 앱 종료 중에는 기록하지 않는다.
 - EXE 옆 B01Timer.ini에 [Records] Count, [Record1] 이후 Id/Title/ExecutablePath/ElapsedTicks, [Settings] SelectedRecordId를 추가한다. 기존 Timer 항목과 migration은 보존한다. 활성 누적은 매초 atomic save하고 종료·Reset·등록 수정 시에도 저장한다.

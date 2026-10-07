@@ -36,11 +36,11 @@
 
 Starter 팀에서 addMode가 `Limited to 1 modes only`로 실패하는 것을 확인했다. Dark/Light는 `B01/Color/Dark`, `B01/Color/Light` 별도 컬렉션에 연결했다. 두 컬렉션의 동일한 역할은 원본의 동일한 WPF Brush에 대응한다. 파일 모드를 바꿔 자동 전환하는 구조가 아니라 Theme variant가 각각 알맞은 컬렉션을 참조한다.
 
-Figma의 available fonts에는 Segoe UI와 Consolas가 없었다. UI는 Inter, 숫자는 Roboto Mono로 표시했다. 원본 앱은 Segoe UI / Consolas 그대로다. 가이드 본문만 Noto Sans KR을 사용했다. font substitution은 text-style description과 JSON에 기록했다.
+Figma의 available fonts에는 Segoe UI와 Consolas가 없었다. 초기 디자인 기준의 UI는 Inter, 숫자는 Roboto Mono로 표시했다. 당시 앱은 Segoe UI / Consolas였으며 현재 EXE는 Pretendard를 내장한다. 가이드 본문만 Noto Sans KR을 사용했다. font substitution은 text-style description과 JSON에 기록했다.
 
 Figma opacity 변수는 percent 단위를 사용한다. WPF Pressed 0.8 → Figma 80, Disabled Neutral 0.45 → 45, Disabled Accent 0.4 → 40, Selection 0.5 → 50이다. `wpfValue`와 `value`를 구분해서 반영해야 한다. 변수의 WEB code syntax는 참조용 export alias이며 WPF에 실제 CSS 변수가 존재한다는 뜻이 아니다.
 
-## 실제 상태와 반응
+## 초기 Figma 스냅샷의 상태와 반응
 
 - Hover: Neutral → HoverBrush, Accent → AccentHoverBrush.
 - Pressed: Hover 배경 + 0.8 opacity.
@@ -66,7 +66,9 @@ Figma MCP의 Starter tool-call quota가 소진되어 use_figma 쓰기와 읽기�
 
 ## 구현의 인터랙션 규칙
 
-Record는 준비 중인 Disabled 버튼이다. 테마 변경 및 preset dialog 열기 동안에도 실행 중 타이머는 계속 진행한다. 즐겨찾기를 선택하면 duration만 설정하고 Ready 상태가 되며 자동 시작하지 않는다. Reset은 가장 최근에 사용자 입력이나 preset으로 설정한 시간으로 돌아가 Ready가 된다. Pause/Resume은 Reset 기준을 바꾸지 않는다.
+현재 Record는 활성 탭이며 등록한 프로그램의 전경 포커스 시간을 자동으로 누적한다. 표시할 칩이나 Timer/Record 탭을 전환해도 모든 등록 프로그램의 측정과 실행 중인 타이머는 계속된다. Record의 Reset은 선택한 기록만 0초로 만든다. 초기 Figma 스냅샷의 Disabled Record는 현재 구현에 적용하지 않는다.
+
+테마 변경 및 preset dialog 열기 동안에도 실행 중 타이머는 계속 진행한다. 즐겨찾기를 선택하면 duration만 설정하고 Ready 상태가 되며 자동 시작하지 않는다. Timer의 Reset은 가장 최근에 사용자 입력이나 preset으로 설정한 시간으로 돌아가 Ready가 된다. Pause/Resume은 Reset 기준을 바꾸지 않는다.
 
 시/분/초를 직접 누른 뒤 오른쪽부터 두 자리씩 입력한다. Hours 40은 40시간, Hours 8은 08시간이다. Minute 408은 04:08이며 기존 seconds를 보존한다. Seconds 123000은 12:30:00이다. 분/초 overflow는 정규화하고 최종 00:00:00–99:59:59 범위를 넘는 입력은 확정하지 않는다.
 
@@ -76,7 +78,7 @@ Add/Edit는 즐겨찾기 목록만 수정한다. Remove도 현재 timer 값이�
 
 `docs/figma-design-map.json`에 실제 반환된 file key, page/frame IDs, 변수 ID/key, styles ID/key, component sets/variants ID/key, glyph ID/key 및 소스 파일 경로를 기록했다. 이름으로 추측하거나 새로운 ID를 만들지 않는다.
 
-수정은 자동 동기화하지 않는다. 사용자가 Figma 변경 반영을 요청하면 현재 파일을 실제 읽고 JSON의 ID로 대응시킨다. 현재 코드와 비교해서 ThemeManager.cs, Styles.xaml, Icons.xaml, DurationEditor, MainWindow, PresetWindow 중 해당 지점만 수정한다. Figma의 대체 폰트는 사용자가 앱 폰트 변경을 요청하지 않는 한 그대로 Windows에 적용하지 않는다. 코드 수정 뒤 기존 core/UI QA와 실제 Dark/Light 화면 검증을 거친다.
+수정은 자동 동기화하지 않는다. 사용자가 Figma 변경 반영을 요청하면 현재 파일을 실제 읽고 JSON의 ID로 대응시킨다. 현재 코드와 비교해서 ThemeManager.cs, Styles.xaml, Icons.xaml, DurationEditor, MainWindow, PresetWindow, RecordWindow 및 Record 모델 중 해당 지점만 수정한다. Figma의 대체 폰트는 사용자가 앱 폰트 변경을 요청하지 않는 한 그대로 Windows에 적용하지 않는다. 코드 수정 뒤 core/appearance/Timer·Record UI QA와 실제 Dark/Light 화면 검증을 거친다.
 
 ## 시각 검증 근거
 
