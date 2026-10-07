@@ -1,4 +1,4 @@
-# B01 Timer 디자인 사양 0.2 (2026-10-07 수정)
+# B01 Timer 디자인 사양 0.3 (2026-10-07 수정)
 
 Timer.png의 위에서 아래로 내려오는 탭 → 시간 즐겨찾기 → 큰 디지털 시간 → 우측 하단 제어 구조를 유지한다. Record는 최대 5개의 실행 프로그램에 대해 실제 전경 포커스 시간을 자동 누적하는 활성 탭이다. 탭 전환은 측정 상태를 변경하지 않는다.
 
@@ -32,7 +32,7 @@ Timer.png의 위에서 아래로 내려오는 탭 → 시간 즐겨찾기 → �
 | Reserved selected token (현재 미사용) | #2F4439 | #DCEBE1 |
 | Error | #F3A8A3 | #AF3C37 |
 
-사실적 그림자, 그라디언트, 글로우는 쓰지 않는다. 창을 띄우는 기본 시스템 그림자는 괜찮다. 정보 위계는 여백, 숫자 크기, 얇은 테두리로 만든다. 테마 변경은 메인/모달/컨텍스트 메뉴/툴팁까지 적용하고 저장한다.
+사실적 그림자, 그라디언트, 글로우는 쓰지 않는다. 창을 띄우는 기본 시스템 그림자는 괜찮다. 정보 위계는 여백, 숫자 크기, 얇은 테두리로 만든다. 테마 변경은 메인/모달/컨텍스트 메뉴/툴팁까지 즉시 적용하고 정상 종료 때 저장한다.
 
 ## 컴포넌트와 상태
 
@@ -65,7 +65,7 @@ Timer.png의 위에서 아래로 내려오는 탭 → 시간 즐겨찾기 → �
 - y=94에 3개 시간입력(각80 width, 42 height, radius8, surface/border)와 콜론. font24 Pretendard Regular (tabular digits); 작은 Hours/Minutes/Seconds label.
 - Main과 동일한 숫자 carry 편집을 사용한다. 0초 preset 저장 금지. 오류는 field 아래 높이16, 11px error 텍스트로 표시하고 레이아웃을 흔들지 않는다.
 - 하단 오른쪽 `Cancel`(raised, 76 × 34) / `Add` 또는 `Save`(accent,76 ×34), gap8. Enter는 Add/Save, Escape는 Cancel. 처음 열면 minutes를 focus/select. 저장 후 칩 목록 갱신하며 타이머는 그대로 둔다.
-- 즐겨찾기·테마·마지막 설정 시간을 EXE 옆 B01Timer.ini에 저장. INI가 없을 때 기존 AppData JSON을 한 번 가져오며 원본은 보존. 재시작 후 유지. preset edit은 기존 칩 위치를 유지한다.
+- 즐겨찾기·테마·마지막 설정 시간은 실행 중 메모리에서만 갱신하고 정상 종료 때 EXE 옆 B01Timer.ini에 한 번 저장한다. INI는 첫 정상 종료 시 생성한다. INI가 없을 때 기존 AppData JSON을 읽고 정상 종료 때 INI로 반영하며 원본은 보존한다. 정상 종료 후 재시작하면 유지된다. 강제 종료·충돌 시 이번 세션 변경은 저장하지 않는다. 종료 직전에 유효한 미확정 시간 입력은 확정하고 잘못된 입력은 기존 값으로 복구한다. preset edit은 기존 칩 위치를 유지한다.
 
 ## 아이콘 출처와 개발 자산
 
@@ -98,4 +98,4 @@ SVG 자산은 src/B01Timer/Assets에 있다. Filled Pause는 기존 Outline glyp
 - Reset/Play/Pause는 24-unit canvas 안에서 실제 ink의 최대 직경을 Reset에 맞추고 20 DIP Viewbox로 표시한다. 세 glyph의 ink center를 버튼 center에 맞춘다. 테마 버튼은 36 × 36, glyph canvas 22 × 22다.
 - 전경 HWND의 실행 파일 전체 경로를 대소문자 구분 없이 비교한다. 같은 프로그램의 여러 창이나 재실행은 같은 기록을 사용한다. 독립적인 실행 파일 경로의 프로그램을 5개까지 등록할 수 있다. 탭이나 표시할 칩은 측정 조건에 포함되지 않는다.
 - 누적은 100ns tick 단위로 보관하고 표시에서만 초를 내린다. Windows awake clock을 사용하며 sleep/hibernation을 제외한다. 세션 잠금 시 WM_WTSSESSION_CHANGE 알림으로 포커스를 해제한다. 전경 프로그램은 50ms마다 확인한다. System.Threading.Timer 신호를 중복 없이 UI Dispatcher에 전달하고 모든 모델 변경과 화면 갱신은 UI thread에서 수행한다. 앱 종료 중에는 기록하지 않는다.
-- EXE 옆 B01Timer.ini에 [Records] Count, [Record1] 이후 Id/Title/ExecutablePath/ElapsedTicks, [Settings] SelectedRecordId를 추가한다. 기존 Timer 항목과 migration은 보존한다. 활성 누적은 매초 atomic save하고 종료·Reset·등록 수정 시에도 저장한다.
+- EXE 옆 B01Timer.ini에 [Records] Count, [Record1] 이후 Id/Title/ExecutablePath/ElapsedTicks, [Settings] SelectedRecordId를 추가한다. 기존 Timer 항목과 migration은 보존한다. 활성 누적·Reset·등록 수정·선택 변경은 메모리에서만 처리한다. 정상 종료 시 마지막 전경 측정 구간을 정산한 뒤 Timer 설정과 함께 한 번 atomic save한다. 배포 ZIP은 B01Timer.exe, LICENSE, THIRD-PARTY-NOTICES.txt 세 파일만 포함하고 checksum은 CI 내부 검증 자료로 보관한다.

@@ -24,8 +24,9 @@ Windows 64비트용 포터블 타이머예요. ZIP을 풀고 B01Timer.exe를 실
 - Dark/Light 테마 · EXE에 내장된 Pretendard 폰트
 - 중심 정렬된 Reset, 채워진 Pause 아이콘, Idle/Hover 버튼 상태
 - 완료 시 삐비빅 알림 두 번
-- EXE와 같은 폴더의 B01Timer.ini에 즐겨찾기·테마·마지막 설정 시간 저장
-- 기존 AppData JSON 설정이 있으면 처음 한 번 INI로 이전
+- 정상 종료 시에만 EXE와 같은 폴더의 B01Timer.ini에 즐겨찾기·테마·마지막 설정 시간·Record 기록 저장
+- 실행 중에는 메모리에서만 갱신하며 강제 종료 시 이번 세션 변경은 저장하지 않음
+- 기존 AppData JSON 설정이 있으면 읽어오고 정상 종료 시 INI로 이전
 - Record: 실행 중인 프로그램 최대 5개 등록, 포커스된 시간 자동 누적
 - Record 누적 시간과 프로그램 목록을 INI에 보관 · 1d / 1w 1d 표시
 - 재생·일시정지·리셋 아이콘 크기 통일, 테마 토글 확대
@@ -33,7 +34,7 @@ Windows 64비트용 포터블 타이머예요. ZIP을 풀고 B01Timer.exe를 실
 
 소스: [$Commit](https://github.com/$Repository/commit/$Commit)
 검증: [Windows 빌드 및 QA](https://github.com/$Repository/actions/runs/$env:GITHUB_RUN_ID)
-EXE·라이선스·SHA256SUMS.txt는 ZIP 안에 포함돼요.
+ZIP에는 B01Timer.exe·LICENSE·THIRD-PARTY-NOTICES.txt만 포함돼요.
 "@
 $notes | Set-Content -Encoding utf8 $notesFile
 function Invoke-ReleaseGh([string[]]$GhArguments) {

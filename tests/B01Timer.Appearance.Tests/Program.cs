@@ -89,9 +89,66 @@ internal static class Program
             badge.Text = "12345w 6d"; window.UpdateLayout();
             Check(position == hours.TransformToAncestor(window).Transform(new Point()) && panelSize == recordPanel.RenderSize, "Day and week badge does not move the clock or alter panel size");
             Check(Typography.GetNumeralAlignment(hours) == FontNumeralAlignment.Tabular, "Record uses stable-width tabular Pretendard digits");
+            VerifyCloseOnlyPersistence(Check);
             Console.WriteLine($"{checks} Windows appearance checks passed.");
         }
         finally { window.Close(); if (System.IO.Directory.Exists(folder)) System.IO.Directory.Delete(folder, true); }
+    }
+
+    private static void VerifyCloseOnlyPersistence(Action<bool, string> check)
+    {
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
+        string folder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "b01-close-save-" + Guid.NewGuid().ToString("N"));
+        var store = new SettingsStore(folder);
+        var settings = new AppSettings
+        {
+            LastSeconds = 10, Favorites = [], SelectedRecordId = "b",
+            Records = [
+                new() { Id = "a", Title = "A", ExecutablePath = @"C:\QA\A.exe", ElapsedTicks = 2 * TimeSpan.TicksPerSecond },
+                new() { Id = "b", Title = "B", ExecutablePath = @"C:\QA\B.exe", ElapsedTicks = 5 * TimeSpan.TicksPerSecond },
+                new() { Id = "c", Title = "C", ExecutablePath = @"C:\QA\C.exe", ElapsedTicks = 7 * TimeSpan.TicksPerSecond }
+            ]
+        };
+        MainWindow? window = null;
+        void Click(string id) => ((Button)window!.FindName(id)).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        void RemoveRecord(int index)
+        {
+            var chips = ((System.Windows.Controls.WrapPanel)window!.FindName("RecordsPanel")).Children.OfType<Button>().ToArray();
+            ((MenuItem)chips[index].ContextMenu!.Items[1]).RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+            window.UpdateLayout();
+        }
+        try
+        {
+            window = new MainWindow(settings, store); window.Show(); window.UpdateLayout();
+            check(!System.IO.File.Exists(store.FilePath), "A real WPF first launch creates no INI before normal close");
+            long ticks = 0;
+            var recorder = new FocusRecorder(settings, () => ticks);
+            typeof(MainWindow).GetField("recorder", flags)!.SetValue(window, recorder);
+            Click("RecordTab"); RemoveRecord(2);
+            check(settings.SelectedRecordId == "b" && ((TextBlock)window.FindName("RecordSeconds")).Text == "05", "Deleting an unselected Record preserves the selected record in memory");
+            RemoveRecord(1);
+            check(settings.SelectedRecordId == "a" && ((TextBlock)window.FindName("RecordSeconds")).Text == "02" && ((Button)window.FindName("ResetButton")).IsEnabled, "Deleting the selected Record immediately displays the remaining record and enables Reset");
+            Click("TimerTab");
+            var editor = (DurationEditor)window.FindName("TimeEditor"); editor.FocusField(TimeField.Seconds);
+            ((TextBox)editor.FindName("SecondsInput")).Text = "123456";
+            recorder.SetForeground(@"C:\QA\A.exe"); ticks = 1_234_567;
+            check(editor.IsEditing && !System.IO.File.Exists(store.FilePath), "Pending input and live Record state remain memory-only before close");
+            // No Tick or dispatcher pulse consumes these final 123.4567 ms.
+            // Closed must account for them and Closing must commit pending input.
+            window.Close(); window = null;
+            var saved = store.Load();
+            check(System.IO.File.Exists(store.FilePath) && saved.LastSeconds == 12 * 3600 + 34 * 60 + 56 && saved.Records.Single().ElapsedTicks == 2 * TimeSpan.TicksPerSecond + 1_234_567, "Normal close saves pending input and the exact final unsampled foreground ticks");
+            byte[] bytes = System.IO.File.ReadAllBytes(store.FilePath);
+            var modified = System.IO.File.GetLastWriteTimeUtc(store.FilePath);
+            window = new MainWindow(saved, store); window.Show(); window.UpdateLayout();
+            Click("RecordTab"); RemoveRecord(0);
+            check(saved.SelectedRecordId == "" && saved.Records.Count == 0 && !((Button)window.FindName("ResetButton")).IsEnabled
+                && ((TextBlock)window.FindName("StatusText")).Text == "Add a program to track"
+                && bytes.SequenceEqual(System.IO.File.ReadAllBytes(store.FilePath)) && modified == System.IO.File.GetLastWriteTimeUtc(store.FilePath), "Deleting the last Record clears selection and disables Reset without changing existing INI");
+            window.Close(); window = null;
+            check(store.Load().Records.Count == 0 && store.Load().SelectedRecordId == "", "Normal close persists the empty Record list and selection");
+        }
+        finally { window?.Close(); if (System.IO.Directory.Exists(folder)) System.IO.Directory.Delete(folder, true); }
     }
 
     private static void VerifyClockLayout(MainWindow window, AppSettings settings, Action<bool, string> check)

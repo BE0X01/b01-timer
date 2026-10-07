@@ -86,6 +86,18 @@ function Stop-App {
     $script:Process = $null
 }
 
+function File-State([string]$Path) {
+    return @{
+        hash = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash
+        modified = [IO.File]::GetLastWriteTimeUtc($Path).Ticks
+    }
+}
+
+function Check-File-Unchanged([string]$Path, $Before, [string]$Name) {
+    $after = File-State $Path
+    Check ($after.hash -eq $Before.hash -and $after.modified -eq $Before.modified) $Name
+}
+
 function Invoke-Control($Control) {
     $pattern = $Control.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern)
     $pattern.Invoke()
@@ -204,8 +216,7 @@ function Capture-Window([string]$Name, $Window = $script:Main) {
 try {
     Start-App
     $overrideIni = Join-Path $script:SettingsDirectory 'B01Timer.ini'
-    Wait-Result { Test-Path $overrideIni } | Out-Null
-    Check (Test-Path $overrideIni) 'Settings override creates B01Timer.ini in the requested test folder'
+    Check (-not (Test-Path $overrideIni)) 'First launch keeps INI absent while the app is open'
     Check ((Get-Control 'RecordTab').Current.IsEnabled) 'Record is enabled'
     Set-Time '123456'
     Capture-Window 'clock-timer-ready'
@@ -346,7 +357,10 @@ try {
     Enter-Field 'PresetSecondsInput' '000055' $dialog '{ESC}'
     Check ($null -eq (Find-Window 'Add preset')) 'Escape from an edited modal field cancels the dialog'
     Check (@(Get-Presets).Count -eq $beforeCount + 1) 'Escape cancellation preserves existing presets'
+    Check (-not (Test-Path $overrideIni)) 'Timer, preset and theme changes do not create INI before normal close'
     Stop-App
+    Check (Test-Path $overrideIni) 'Normal close creates B01Timer.ini in the requested settings folder'
+    $overrideBefore = File-State $overrideIni
     Start-App
     Check ((Get-Control 'ThemeButton').Current.Name -eq $themeAfter) 'Theme survives relaunch'
     Check ($null -ne (Preset-Named '00:00:19')) 'Edited preset survives relaunch'
@@ -365,6 +379,7 @@ try {
 
     # Test the real default storage location by copying only the standalone EXE,
     # launching without --settings-dir, and using a different working directory.
+    Check-File-Unchanged $overrideIni $overrideBefore 'Existing INI bytes and modification time stay unchanged through preset removal and countdown/reset'
     Stop-App
     $portableDirectory = Join-Path $ArtifactDirectory 'portable'
     New-Item -ItemType Directory -Force -Path $portableDirectory | Out-Null
@@ -381,9 +396,7 @@ try {
     $script:LegacyTouched = $true
     [IO.File]::WriteAllText($script:LegacyJsonPath, $legacyJson)
     Start-App -Portable
-    Wait-Result { Test-Path $portableIni } | Out-Null
-    Check (Test-Path $portableIni) 'Default first launch creates INI next to the copied EXE'
-    Check (-not (Test-Path (Join-Path $ArtifactDirectory 'B01Timer.ini'))) 'Default INI uses the EXE folder rather than the working directory'
+    Check (-not (Test-Path $portableIni)) 'Legacy JSON import loads in memory without creating portable INI'
     Check-Time '01:02:03' 'Default first launch migrates configured time from AppData JSON'
     Check ($null -ne (Preset-Named '00:00:45') -and @(Get-Presets).Count -eq 1) 'Default first launch migrates legacy preset'
     Check ([IO.File]::ReadAllText($script:LegacyJsonPath) -eq $legacyJson) 'Migration preserves the legacy JSON file unchanged'
@@ -397,18 +410,36 @@ try {
     Enter-Field 'PresetSecondsInput' '000037' $dialog '{TAB}'
     Press-Button 'PresetSaveButton' $dialog
     Wait-Result { Preset-Named '00:00:37' } | Out-Null
+    Check (-not (Test-Path $portableIni)) 'Imported settings and new portable edits remain in memory until normal close'
+    Capture-Window 'portable-ini-main'
+    Stop-App
+    Check ((Test-Path $portableIni) -and -not (Test-Path (Join-Path $ArtifactDirectory 'B01Timer.ini'))) 'Normal close saves imported settings beside the EXE rather than the working directory'
     $iniText = [IO.File]::ReadAllText($portableIni)
     Check ($iniText -match '(?m)^\[Settings\]' -and $iniText -match '(?m)^\[Presets\]') 'Portable settings are readable INI sections'
     Check ($iniText -match '(?m)^LastTime\s*=\s*04:05:06\s*$') 'Portable INI stores the configured time'
     Check ($iniText -match '(?m)^Theme\s*=\s*light\s*$') 'Portable INI stores the selected theme'
     Check ($iniText -match '(?m)^Count\s*=\s*2\s*$' -and $iniText -match '(?m)^Time\s*=\s*00:00:37\s*$') 'Portable INI stores favorites'
-    Capture-Window 'portable-ini-main'
-    Stop-App
+    $portableBefore = File-State $portableIni
     [IO.File]::WriteAllText($script:LegacyJsonPath, '{"Theme":"dark","LastSeconds":0,"Favorites":[]}')
     Start-App -Portable
     Check-Time '04:05:06' 'Portable configured time survives relaunch and ignores changed legacy JSON'
     Check ((Get-Control 'ThemeButton').Current.Name -eq $portableTheme) 'Portable theme survives relaunch'
     Check ($null -ne (Preset-Named '00:00:37') -and $null -ne (Preset-Named '00:00:45') -and @(Get-Presets).Count -eq 2) 'Portable favorites survive relaunch without a second migration'
+    Enter-Field 'SecondsInput' '070809' $script:Main ''
+    Check-File-Unchanged $portableIni $portableBefore 'Typing a pending time does not touch existing INI bytes or modification time'
+    Stop-App
+    Check ([IO.File]::ReadAllText($portableIni) -match '(?m)^LastTime=07:08:09\s*$') 'Normal close commits valid time input without Enter before saving'
+    $portableBefore = File-State $portableIni
+    Start-App -Portable
+    Check-Time '07:08:09' 'A time committed by normal close is restored on the next launch'
+    Set-Time '080910'
+    Check-File-Unchanged $portableIni $portableBefore 'Committed time changes stay in memory while the app is open'
+    $script:Process.Kill()
+    $script:Process.WaitForExit(5000) | Out-Null
+    $script:Process.Dispose(); $script:Process = $null
+    Check-File-Unchanged $portableIni $portableBefore 'Forced termination preserves the previous INI bytes and modification time'
+    Start-App -Portable
+    Check-Time '07:08:09' 'Forced termination discards the current session time changes'
     Stop-App
     [IO.File]::WriteAllText($portableIni, "[Settings]`r`nTheme=dark`r`nLastTime=00:00:08`r`n[Presets]`r`nCount=0`r`n")
     Start-App -Portable
@@ -442,6 +473,11 @@ try {
     Start-Sleep -Milliseconds 120
     Capture-Window 'paused-no-stroke'
     Press-Button 'ResetButton'
+    # Exercise packaging with a stale checksum from a previous publish folder.
+    # package-release.ps1 must still select and validate exactly three ZIP entries.
+    $staleManifest = Join-Path $PSScriptRoot '../artifacts/publish/SHA256SUMS.txt'
+    'STALE CHECKSUM FILE FOR PACKAGE REGRESSION' | Set-Content -Encoding UTF8 $staleManifest
+    Write-Output 'Seeded an old publish checksum file for the three-entry package regression.'
     Write-Output "$($script:Results.Count) independent UI checks passed."
 } catch {
     $script:Results.Add([pscustomobject]@{ name = 'Unhandled test failure'; passed = $false; detail = $_.Exception.ToString() })

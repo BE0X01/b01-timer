@@ -25,8 +25,6 @@ public partial class MainWindow : Window
     private ForegroundPrograms? foreground;
     private readonly Geometry playIcon, pauseIcon;
     private bool recordView;
-    private long lastRecordSave;
-    private decimal savedTotalTicks;
     private int diagnosticTicks;
     private string validation = "";
     private string statusBrush = "";
@@ -51,11 +49,12 @@ public partial class MainWindow : Window
         Loaded += (_, _) =>
         {
             App.Diagnostic?.Invoke("Loaded start");
-            SaveSettings(); initialized = true; SetDwmAppearance(); RenderPresets(); RenderRecords(); UpdateThemeButton(); UpdateDisplay();
+            initialized = true; SetDwmAppearance(); RenderPresets(); RenderRecords(); UpdateThemeButton(); UpdateDisplay();
             App.Diagnostic?.Invoke("foreground construction");
             pulse.Change(0, 50); foreground = new(new WindowInteropHelper(this).Handle); App.Diagnostic?.Invoke("foreground created"); foreground.Changed += path => recorder.SetForeground(path); foreground.Sample();
             App.Diagnostic?.Invoke("Loaded end pulse=active");
         };
+        Closing += (_, _) => { TimeEditor.Commit(); Keyboard.ClearFocus(); };
         Closed += (_, _) => { closed = true; pulse.Dispose(); recorder.SetForeground(null); foreground?.Dispose(); alarm.Dispose(); SaveSettings(); };
         StateChanged += (_, _) => MaximizeButton.ToolTip = WindowState == WindowState.Maximized ? "Restore" : "Maximize";
         PreviewKeyDown += Window_PreviewKeyDown;
@@ -81,9 +80,6 @@ public partial class MainWindow : Window
             if (settings.Records.Count > 0)
             {
                 foreground?.Sample(); recorder.Tick();
-                long now = ForegroundPrograms.AwakeTicks();
-                if (now - lastRecordSave >= TimeSpan.TicksPerSecond && settings.Records.Sum(r => (decimal)r.ElapsedTicks) != savedTotalTicks)
-                { SaveSettings(); lastRecordSave = now; }
             }
             if (diagnosticTicks % 20 == 0) App.Diagnostic?.Invoke("pulse " + diagnosticTicks + " editing=" + TimeEditor.IsEditing + " remaining=" + timer.RemainingSeconds + " state=" + timer.State);
             UpdateDisplay();
@@ -102,11 +98,11 @@ public partial class MainWindow : Window
     {
         alarm.Stop();
         timer.Configure(seconds); settings.LastSeconds = seconds; validation = ""; TimeEditor.ClearValidation();
-        SaveSettings(); RenderPresets(); UpdateDisplay();
+        RenderPresets(); UpdateDisplay();
     }
     private void SaveSettings()
     {
-        try { store.Save(settings); savedTotalTicks = settings.Records.Sum(r => (decimal)r.ElapsedTicks); }
+        try { store.Save(settings); }
         catch (Exception e) when (e is System.IO.IOException or UnauthorizedAccessException) { validation = "Settings could not be saved."; }
     }
     private void UpdateDisplay()
@@ -167,7 +163,7 @@ public partial class MainWindow : Window
     }
     private void Reset_Click(object sender, RoutedEventArgs e)
     {
-        if (recordView) { recorder.Reset(settings.SelectedRecordId); validation = ""; SaveSettings(); UpdateDisplay(); return; }
+        if (recordView) { recorder.Reset(settings.SelectedRecordId); validation = ""; UpdateDisplay(); return; }
         alarm.Stop(); TimeEditor.Commit(); timer.Reset(); TimeEditor.ClearValidation(); validation = ""; UpdateDisplay();
     }
     private void TimerTab_Click(object sender, RoutedEventArgs e) => SwitchView(false);
@@ -186,7 +182,7 @@ public partial class MainWindow : Window
     }
     private void Theme_Click(object sender, RoutedEventArgs e)
     {
-        settings.Theme = settings.Theme == "dark" ? "light" : "dark"; ThemeManager.Apply(settings.Theme); SaveSettings(); UpdateThemeButton(); SetDwmAppearance();
+        settings.Theme = settings.Theme == "dark" ? "light" : "dark"; ThemeManager.Apply(settings.Theme); UpdateThemeButton(); SetDwmAppearance();
     }
     private void UpdateThemeButton()
     {
@@ -207,7 +203,7 @@ public partial class MainWindow : Window
             chip.Click += (_, _) => { Keyboard.ClearFocus(); ConfigureTime(favorite.Seconds); };
             var menu = new ContextMenu();
             var edit = new MenuItem { Header = "Edit" }; edit.Click += (_, _) => OpenPreset(favorite);
-            var remove = new MenuItem { Header = "Remove" }; remove.SetResourceReference(MenuItem.ForegroundProperty, "ErrorBrush"); remove.Click += (_, _) => { settings.Favorites.RemoveAll(f => f.Id == favorite.Id); SaveSettings(); RenderPresets(); };
+            var remove = new MenuItem { Header = "Remove" }; remove.SetResourceReference(MenuItem.ForegroundProperty, "ErrorBrush"); remove.Click += (_, _) => { settings.Favorites.RemoveAll(f => f.Id == favorite.Id); RenderPresets(); };
             menu.Items.Add(edit); menu.Items.Add(remove); chip.ContextMenu = menu; PresetsPanel.Children.Add(chip);
         }
         var add = new Button { Width = 32, Height = 32, Padding = new Thickness(8), Style = (Style)FindResource("ButtonBase"), Background = Brushes.Transparent, BorderThickness = new Thickness(1), ToolTip = "Add preset" };
@@ -222,7 +218,7 @@ public partial class MainWindow : Window
         if (dialog.ShowDialog() != true) return;
         if (favorite is null) settings.Favorites.Add(new(Guid.NewGuid().ToString("N"), dialog.ResultSeconds));
         else { int index = settings.Favorites.FindIndex(f => f.Id == favorite.Id); if (index >= 0) settings.Favorites[index] = favorite with { Seconds = dialog.ResultSeconds }; }
-        SaveSettings(); RenderPresets();
+        RenderPresets();
     }
     private void RenderRecords()
     {
@@ -233,11 +229,16 @@ public partial class MainWindow : Window
             var chip = new Button { Content = new TextBlock { Text = record.Title, TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 126 }, Height = 32,
                 Padding = new Thickness(12, 0, 12, 0), Margin = new Thickness(0, 0, 8, 0), Style = (Style)FindResource("ButtonBase"), ToolTip = record.Title + "\n" + record.ExecutablePath + "\nRight-click to edit or remove" };
             AutomationProperties.SetAutomationId(chip, $"RecordChip_{i}"); AutomationProperties.SetName(chip, record.Title);
-            chip.Click += (_, _) => { settings.SelectedRecordId = record.Id; SaveSettings(); UpdateDisplay(); };
+            chip.Click += (_, _) => { settings.SelectedRecordId = record.Id; UpdateDisplay(); };
             var menu = new ContextMenu();
             var edit = new MenuItem { Header = "Edit" }; edit.Click += (_, _) => OpenRecord(record);
             var remove = new MenuItem { Header = "Remove" }; remove.SetResourceReference(MenuItem.ForegroundProperty, "ErrorBrush");
-            remove.Click += (_, _) => { recorder.Tick(); settings.Records.Remove(record); SaveSettings(); RenderRecords(); UpdateDisplay(); };
+            remove.Click += (_, _) =>
+            {
+                recorder.Tick(); settings.Records.Remove(record);
+                if (settings.SelectedRecordId == record.Id) settings.SelectedRecordId = settings.Records.FirstOrDefault()?.Id ?? "";
+                RenderRecords(); UpdateDisplay();
+            };
             menu.Items.Add(edit); menu.Items.Add(remove); chip.ContextMenu = menu; RecordsPanel.Children.Add(chip);
         }
         var add = new Button { Width = 32, Height = 32, Padding = new Thickness(8), Style = (Style)FindResource("ButtonBase"), Background = Brushes.Transparent,
@@ -259,7 +260,7 @@ public partial class MainWindow : Window
             settings.Records.Add(record); settings.SelectedRecordId = record.Id;
         }
         else { record.Title = dialog.ResultTitle; record.ExecutablePath = dialog.ResultPath; }
-        SaveSettings(); RenderRecords(); UpdateDisplay();
+        RenderRecords(); UpdateDisplay();
     }
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {

@@ -80,6 +80,16 @@ function Focus-Probe([int]$Index) {
 function Display-Time {
     return "$( (Control 'RecordHours').Current.Name ):$( (Control 'RecordMinutes').Current.Name ):$( (Control 'RecordSeconds').Current.Name )"
 }
+function Display-Seconds {
+    $parts = (Display-Time).Split(':')
+    return 3600 * [int]$parts[0] + 60 * [int]$parts[1] + [int]$parts[2]
+}
+function File-State {
+    return @{
+        hash = (Get-FileHash -LiteralPath $ini -Algorithm SHA256).Hash
+        modified = [IO.File]::GetLastWriteTimeUtc($ini).Ticks
+    }
+}
 function Record-Ticks([int]$Index) {
     $text = Get-Content -Raw $ini
     $section = [regex]::Match($text, "(?ms)^\[Record$Index\]\r?\n(.*?)(?=^\[|\z)").Groups[1].Value
@@ -128,6 +138,7 @@ public static class RecordProbe {
         Wait-For { $probe.Refresh(); $probe.MainWindowHandle -ne [IntPtr]::Zero } | Out-Null
     }
     Start-App; Invoke 'RecordTab'
+    Check (-not (Test-Path $ini)) 'Record first launch does not create INI while open'
     Check ((Display-Time) -eq '00:00:00' -and (Control 'AddRecordButton').Current.IsEnabled) 'Record starts at zero with only an Add chip'
     Check (-not (Control 'ResetButton').Current.IsEnabled) 'Empty record reset is disabled'
     # Both title and program selection are required.
@@ -156,27 +167,42 @@ public static class RecordProbe {
     Invoke 'TimerTab'
     Focus-Window ([IntPtr]$main.Current.NativeWindowHandle)
     $input = Control 'SecondsInput'; $input.SetFocus(); [Windows.Forms.SendKeys]::SendWait('^a30{ENTER}'); Invoke 'StartPauseButton'
-    Invoke 'RecordTab'; $before = Record-Ticks 1; Focus-Probe 0; Start-Sleep -Milliseconds 1500
+    Invoke 'RecordTab'; $before = Display-Seconds; Focus-Probe 0; Start-Sleep -Milliseconds 1500
     Invoke 'TimerTab'
     $remaining = (Control 'RecordSeconds').Current.Name
     Check ([int]$remaining -lt 30) 'Countdown keeps running on Record tab'
-    Focus-Probe 1; Start-Sleep -Milliseconds 1500; Invoke 'RecordTab'; Invoke 'RecordChip_1'
-    Check ((Display-Time) -ne '00:00:00' -and (Record-Ticks 1) -gt $before) 'Record keeps accumulating across both tabs'
+    Focus-Probe 1; Start-Sleep -Milliseconds 1500; Invoke 'RecordTab'; $after = Display-Seconds; Invoke 'RecordChip_1'
+    Check ((Display-Time) -ne '00:00:00' -and $after -gt $before) 'Record keeps accumulating in memory across both tabs'
     Screenshot 'record-two-programs'
+    Check (-not (Test-Path $ini)) 'Active recording, selection, registration and Reset do not create INI before normal close'
     Stop-App; $savedA = Record-Ticks 1; $savedB = Record-Ticks 2
+    Check ($savedA -gt 0 -and $savedB -gt 0) 'Normal close creates INI containing both measured program totals'
+    $fileBefore = File-State
     Focus-Probe 2; Start-Sleep -Milliseconds 1200; Start-App; Invoke 'RecordTab'
-    Check ((Record-Ticks 1) -eq $savedA -and (Record-Ticks 2) -eq $savedB) 'Restart retains both totals without offline time'
+    $restoredB = Display-Seconds; Invoke 'RecordChip_0'; $restoredA = Display-Seconds; Invoke 'RecordChip_1'
+    Check ($restoredA -eq [Math]::Floor($savedA / 10000000.0) -and $restoredB -eq [Math]::Floor($savedB / 10000000.0)) 'Restart restores both in-memory totals without offline time'
     Check ((Control 'RecordChip_0').Current.Name -eq 'Work A' -and (Control 'RecordChip_1').Current.Name -eq 'Work B') 'Restart restores program registrations'
     $probe = $probes[1]; $probe.CloseMainWindow() | Out-Null; $probe.WaitForExit(3000) | Out-Null; $probe.Dispose()
     $probes[1] = Start-Process (Join-Path $ArtifactDirectory 'RecordProbe2.exe') -ArgumentList 'RecordProbe2 restarted' -PassThru
     Wait-For { $probes[1].Refresh(); $probes[1].MainWindowHandle -ne [IntPtr]::Zero } | Out-Null
-    Focus-Probe 1; Wait-For { (Record-Ticks 2) -gt $savedB } 6000 | Out-Null
-    Check ((Record-Ticks 2) -gt $savedB) 'Restarted target program matches its persisted executable'
+    Focus-Probe 1; Wait-For { (Display-Seconds) -gt $restoredB } 6000 | Out-Null
+    Check ((Display-Seconds) -gt $restoredB) 'Restarted target program continues its in-memory total for the persisted executable'
     Focus-Window ([IntPtr]$main.Current.NativeWindowHandle)
+    Invoke 'ResetButton'
+    Check ((Display-Time) -eq '00:00:00') 'Reset updates an existing saved Record in memory'
+    Invoke 'ThemeButton'; Invoke 'TimerTab'
+    $input = Control 'SecondsInput'; $input.SetFocus(); [Windows.Forms.SendKeys]::SendWait('^a123456{ENTER}')
+    Invoke 'AddPresetButton'; $dialog = Window-Named 'Add preset'
+    (Control 'PresetSecondsInput' $dialog).SetFocus(); [Windows.Forms.SendKeys]::SendWait('^a000017{TAB}'); Invoke 'PresetSaveButton' $dialog
+    Invoke 'RecordTab'
     Add-Record 3 'Work C'; Add-Record 4 'Work D'; Add-Record 5 'Work E'
     Check (-not (Control 'AddRecordButton').Current.IsEnabled) 'Five programs disables further registration'
     Screenshot 'record-five-programs'
+    $fileAfter = File-State
+    Check ($fileBefore.hash -eq $fileAfter.hash -and $fileBefore.modified -eq $fileAfter.modified) 'Existing INI bytes and modification time do not change during active recording, reset, theme, time, preset or registration edits'
     Stop-App
+    $closedIni = Get-Content -Raw $ini
+    Check ($closedIni -match '(?m)^Theme=light\s*$' -and $closedIni -match '(?m)^LastTime=12:34:56\s*$' -and $closedIni -match '(?m)^Time=00:00:17\s*$' -and $closedIni -match '(?m)^Title=Work E\s*$') 'Normal close saves the final theme, time, new preset and all program registrations'
     # Seed boundary times into the same persisted format, then run the real EXE.
     foreach ($case in @(@{ ticks = 864000000000L; badge = '1d'; image = 'record-day' }, @{ ticks = 6048000000000L; badge = '1w'; image = 'record-week' }, @{ ticks = 6948610000000L; badge = '1w 1d'; image = 'record-week-day' })) {
         $text = Get-Content -Raw $ini
