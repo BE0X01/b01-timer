@@ -38,10 +38,15 @@ jobs:
           if (-not $version) { $version = [string]$project.Project.PropertyGroup.Version }
           if ($version -notmatch '^\d+\.\d+(?:\.\d+)?(?:-[A-Za-z0-9.-]+)?$') { throw 'Invalid release version.' }
           "release_version=$version" | Add-Content -Encoding utf8 $env:GITHUB_OUTPUT
+      - name: Install managed stack diagnostics
+        shell: pwsh
+        run: dotnet tool install --tool-path ./.diagnostic-tools dotnet-stack
       - name: Test and build standalone EXE
         id: build
         timeout-minutes: 4
         shell: pwsh
+        env:
+          B01TIMER_STACK_TOOL: ${{ github.workspace }}\.diagnostic-tools\dotnet-stack.exe
         run: ./scripts/build.ps1
       - name: Verify actual Windows GUI
         shell: powershell

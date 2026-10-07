@@ -14,6 +14,7 @@ internal static class Program
         int checks = 0;
         void Check(bool result, string name) { if (!result) throw new Exception(name); checks++; Console.WriteLine($"PASS {name}"); }
         string folder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "b01-appearance-" + Guid.NewGuid().ToString("N"));
+        typeof(App).GetField("Diagnostic", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!.SetValue(null, new Action<string>(Console.WriteLine));
         var app = new App(); app.InitializeComponent(); ThemeManager.Apply("dark");
         var window = new MainWindow(new AppSettings { LastSeconds = 900 }, new SettingsStore(folder));
         try
@@ -50,10 +51,28 @@ internal static class Program
             Check(pause.FillContains(new Point(6, 12)) && pause.FillContains(new Point(18, 12)) && !pause.FillContains(new Point(12, 12)), "Running timer displays two filled Pause bars");
             window.UpdateLayout();
             Check(Math.Abs(RenderedSize(play) - RenderedSize(glyph)) < 0.05 && (IconCenter(play) - start.TransformToAncestor(window).Transform(new Point(start.ActualWidth / 2, start.ActualHeight / 2))).Length < 0.05, "Filled Pause matches Reset size and is centered");
-            using var watchdog = new System.Threading.Timer(_ => { Console.Error.WriteLine("FAIL WPF clock update did not complete within 10 seconds."); Environment.Exit(1); }, null, 10000, System.Threading.Timeout.Infinite);
+            using var watchdog = new System.Threading.Timer(_ =>
+            {
+                Console.Error.WriteLine("FAIL WPF clock update did not complete within 10 seconds.");
+                try
+                {
+                    string? tool = Environment.GetEnvironmentVariable("B01TIMER_STACK_TOOL");
+                    if (tool is not null)
+                    {
+                        var info = new System.Diagnostics.ProcessStartInfo(tool) { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false, CreateNoWindow = true };
+                        info.ArgumentList.Add("report"); info.ArgumentList.Add("-p"); info.ArgumentList.Add(Environment.ProcessId.ToString());
+                        using var process = System.Diagnostics.Process.Start(info)!;
+                        var output = process.StandardOutput.ReadToEndAsync(); var errors = process.StandardError.ReadToEndAsync();
+                        if (process.WaitForExit(5000)) { Console.Error.WriteLine(output.GetAwaiter().GetResult()); Console.Error.WriteLine(errors.GetAwaiter().GetResult()); }
+                        else process.Kill(true);
+                    }
+                }
+                catch (Exception error) { Console.Error.WriteLine(error.Message); }
+                Environment.Exit(1);
+            }, null, 10000, System.Threading.Timeout.Infinite);
             var frame = new System.Windows.Threading.DispatcherFrame();
             var wait = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.Send) { Interval = TimeSpan.FromMilliseconds(1250) };
-            wait.Tick += (_, _) => { wait.Stop(); frame.Continue = false; }; wait.Start(); System.Windows.Threading.Dispatcher.PushFrame(frame);
+            wait.Tick += (_, _) => { wait.Stop(); frame.Continue = false; }; wait.Start(); Console.WriteLine("TRACE entering WPF frame"); System.Windows.Threading.Dispatcher.PushFrame(frame); Console.WriteLine("TRACE exited WPF frame");
             Check(((TextBlock)window.FindName("RecordSeconds")).Text == "59", "Live countdown clock advances while editable inputs remain separate");
             ((Button)window.FindName("RecordTab")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); window.UpdateLayout();
             Check(start.Visibility == Visibility.Collapsed && reset.Visibility == Visibility.Visible, "Record has only the Reset action");
