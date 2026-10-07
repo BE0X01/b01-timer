@@ -17,7 +17,7 @@ public partial class MainWindow : Window
     private readonly CountdownTimer timer = new();
     private readonly AppSettings settings;
     private readonly SettingsStore store;
-    private readonly DispatcherTimer pulse = new() { Interval = TimeSpan.FromMilliseconds(50) };
+    private readonly DispatcherTimer pulse = new(DispatcherPriority.Normal) { Interval = TimeSpan.FromMilliseconds(50) };
     private readonly CompletionAlarm alarm = new();
     private readonly FocusRecorder recorder;
     private ForegroundPrograms? foreground;
@@ -59,7 +59,7 @@ public partial class MainWindow : Window
             App.Diagnostic?.Invoke("Loaded start");
             SaveSettings(); initialized = true; SetDwmAppearance(); RenderPresets(); RenderRecords(); UpdateThemeButton(); UpdateDisplay();
             App.Diagnostic?.Invoke("foreground construction");
-            pulse.Start(); foreground = new(); App.Diagnostic?.Invoke("foreground created"); foreground.Changed += path => recorder.SetForeground(path); foreground.Sample();
+            pulse.Start(); foreground = new(new WindowInteropHelper(this).Handle); App.Diagnostic?.Invoke("foreground created"); foreground.Changed += path => recorder.SetForeground(path); foreground.Sample();
             App.Diagnostic?.Invoke("Loaded end pulse=" + pulse.IsEnabled);
         };
         Closed += (_, _) => { pulse.Stop(); recorder.SetForeground(null); foreground?.Dispose(); alarm.Dispose(); SaveSettings(); };

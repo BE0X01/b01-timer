@@ -15,7 +15,7 @@ permissions:
   contents: read
 concurrency:
   group: b01-timer-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   windows:
     runs-on: windows-latest
@@ -39,6 +39,7 @@ jobs:
           if ($version -notmatch '^\d+\.\d+(?:\.\d+)?(?:-[A-Za-z0-9.-]+)?$') { throw 'Invalid release version.' }
           "release_version=$version" | Add-Content -Encoding utf8 $env:GITHUB_OUTPUT
       - name: Test and build standalone EXE
+        timeout-minutes: 4
         shell: pwsh
         run: ./scripts/build.ps1
       - name: Verify actual Windows GUI

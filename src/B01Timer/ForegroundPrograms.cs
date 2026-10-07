@@ -1,7 +1,8 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using Microsoft.Win32;
+using System.Windows.Interop;
+using System.Windows.Threading;
 
 namespace B01Timer;
 
@@ -17,24 +18,36 @@ public sealed class ForegroundPrograms : IDisposable
     private delegate bool EnumWindowsProc(IntPtr hwnd, IntPtr parameter);
     private readonly WinEventProc callback;
     private readonly IntPtr hook;
-    private volatile bool locked;
+    private readonly HwndSource source;
+    private readonly IntPtr window;
+    private bool locked;
+    private bool disposed;
     public event Action<string?>? Changed;
 
-    public ForegroundPrograms()
+    public ForegroundPrograms(IntPtr window)
     {
-        callback = (_, _, _, _, _, _, _) => Sample();
+        this.window = window;
+        source = HwndSource.FromHwnd(window)!;
+        // Native callbacks may be reentrant. Deliver focus sampling through WPF.
+        callback = (_, _, _, _, _, _, _) => source.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(Sample));
         hook = SetWinEventHook(3, 3, IntPtr.Zero, callback, 0, 0, 0);
-        SystemEvents.SessionSwitch += SessionChanged;
+        source.AddHook(SessionMessage);
+        WTSRegisterSessionNotification(window, 0);
     }
 
-    private void SessionChanged(object sender, SessionSwitchEventArgs e)
+    private IntPtr SessionMessage(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
-        if (e.Reason is SessionSwitchReason.SessionLock or SessionSwitchReason.SessionLogoff or SessionSwitchReason.RemoteDisconnect or SessionSwitchReason.ConsoleDisconnect) locked = true;
-        else if (e.Reason is SessionSwitchReason.SessionUnlock or SessionSwitchReason.SessionLogon or SessionSwitchReason.RemoteConnect or SessionSwitchReason.ConsoleConnect) locked = false;
-        System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(Sample));
+        if (message == 0x02B1)
+        {
+            int reason = wParam.ToInt32();
+            if (reason is 2 or 4 or 6 or 7) locked = true;
+            else if (reason is 1 or 3 or 5 or 8) locked = false;
+            Sample();
+        }
+        return IntPtr.Zero;
     }
 
-    public void Sample() => Changed?.Invoke(locked ? null : ExecutableFor(GetForegroundWindow()));
+    public void Sample() { if (!disposed) Changed?.Invoke(locked ? null : ExecutableFor(GetForegroundWindow())); }
     public static long AwakeTicks()
     {
         // QueryUnbiasedInterruptTime excludes sleep and hibernation and uses 100ns units.
@@ -51,7 +64,9 @@ public sealed class ForegroundPrograms : IDisposable
         if (process == IntPtr.Zero) return null;
         try
         {
-            var text = new StringBuilder(32768); uint length = (uint)text.Capacity;
+            var text = new StringBuilder(1024); uint length = (uint)text.Capacity;
+            if (QueryFullProcessImageName(process, 0, text, ref length)) return text.ToString();
+            text = new StringBuilder(32768); length = (uint)text.Capacity;
             return QueryFullProcessImageName(process, 0, text, ref length) ? text.ToString() : null;
         }
         finally { CloseHandle(process); }
@@ -74,7 +89,9 @@ public sealed class ForegroundPrograms : IDisposable
 
     public void Dispose()
     {
-        SystemEvents.SessionSwitch -= SessionChanged;
+        disposed = true;
+        WTSUnRegisterSessionNotification(window);
+        if (!source.IsDisposed) source.RemoveHook(SessionMessage);
         if (hook != IntPtr.Zero) UnhookWinEvent(hook);
         GC.KeepAlive(callback);
     }
@@ -90,4 +107,6 @@ public sealed class ForegroundPrograms : IDisposable
     [DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr hwnd);
     [DllImport("user32.dll")] private static extern IntPtr GetWindow(IntPtr hwnd, uint command);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetWindowText(IntPtr hwnd, StringBuilder text, int count);
+    [DllImport("wtsapi32.dll")] private static extern bool WTSRegisterSessionNotification(IntPtr hwnd, uint flags);
+    [DllImport("wtsapi32.dll")] private static extern bool WTSUnRegisterSessionNotification(IntPtr hwnd);
 }
