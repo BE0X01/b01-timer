@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>B01Timer</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets/timer.ico</ApplicationIcon>
+    <Version>1.0.0</Version>
+    <AssemblyTitle>B01 Timer</AssemblyTitle>
+    <Product>B01 Timer</Product>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../B01Timer.Core/B01Timer.Core.csproj" />
+    <Resource Include="Assets/timer.ico" />
+  </ItemGroup>
+</Project>
