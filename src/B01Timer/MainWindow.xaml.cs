@@ -25,6 +25,7 @@ public partial class MainWindow : Window
     private bool recordView;
     private long lastRecordSave;
     private decimal savedTotalTicks;
+    private int diagnosticTicks;
     private string validation = "";
     private bool initialized;
 
@@ -45,6 +46,7 @@ public partial class MainWindow : Window
         TimeEditor.ValidationChanged += message => { validation = message; UpdateDisplay(); };
         pulse.Tick += (_, _) =>
         {
+            if (diagnosticTicks++ < 3) App.Diagnostic?.Invoke("pulse " + diagnosticTicks + " editing=" + TimeEditor.IsEditing + " remaining=" + timer.RemainingSeconds);
             foreground?.Sample(); recorder.Tick();
             if (timer.Tick()) { alarm.Play(); FlashWindow(new WindowInteropHelper(this).Handle, false); }
             long now = ForegroundPrograms.AwakeTicks();
@@ -54,8 +56,11 @@ public partial class MainWindow : Window
         };
         Loaded += (_, _) =>
         {
+            App.Diagnostic?.Invoke("Loaded start");
             SaveSettings(); initialized = true; SetDwmAppearance(); RenderPresets(); RenderRecords(); UpdateThemeButton(); UpdateDisplay();
-            foreground = new(); foreground.Changed += path => recorder.SetForeground(path); foreground.Sample(); pulse.Start();
+            App.Diagnostic?.Invoke("foreground construction");
+            foreground = new(); App.Diagnostic?.Invoke("foreground created"); foreground.Changed += path => recorder.SetForeground(path); foreground.Sample(); pulse.Start();
+            App.Diagnostic?.Invoke("Loaded end pulse=" + pulse.IsEnabled);
         };
         Closed += (_, _) => { pulse.Stop(); recorder.SetForeground(null); foreground?.Dispose(); alarm.Dispose(); SaveSettings(); };
         StateChanged += (_, _) => MaximizeButton.ToolTip = WindowState == WindowState.Maximized ? "Restore" : "Maximize";
@@ -114,6 +119,7 @@ public partial class MainWindow : Window
         alarm.Stop();
         if (timer.State == CountdownState.Running) timer.Pause(); else timer.Start();
         validation = ""; UpdateDisplay();
+        App.Diagnostic?.Invoke("StartPause state=" + timer.State + " remaining=" + timer.RemainingSeconds + " editing=" + TimeEditor.IsEditing + " pulse=" + pulse.IsEnabled + " ticks=" + diagnosticTicks);
     }
     private void Reset_Click(object sender, RoutedEventArgs e)
     {

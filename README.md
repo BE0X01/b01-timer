@@ -1,6 +1,6 @@
-# B01 Timer 0.1
+# B01 Timer
 
-A minimal Windows timer with editable hours, minutes and seconds, reusable presets, and light/dark themes. Record is reserved for a future update and is currently disabled.
+A minimal Windows timer with editable hours, minutes and seconds, reusable presets, and light/dark themes. Record automatically measures foreground time for up to five registered programs.
 
 ## Run
 
@@ -11,20 +11,28 @@ Download the ZIP from [GitHub Releases](https://github.com/BE0X01/b01-timer/rele
 - Select a preset to set the time without starting. Use `+` to add a preset and right-click a preset for Edit/Remove.
 - Play starts or resumes; Pause preserves remaining time. Reset restores the latest time you configured and waits.
 - Editing a running timer pauses it. Adding/editing a preset leaves the timer running in the background.
-- Space starts/pauses when you are outside a time input. Ctrl+R resets.
+- Space starts/pauses in Timer when you are outside a time input. Ctrl+R resets the current timer or selected record.
 - The top-right sun/moon button switches themes.
 
-Theme, presets and the latest configured time are stored in `B01Timer.ini` beside `B01Timer.exe`. The INI is created on first launch; keep the EXE in a folder you can write to. Moving this folder keeps your presets and settings with the app. If an older `%LOCALAPPDATA%\B01Timer\settings.json` exists and no portable INI exists yet, its settings are imported once; the original JSON is kept. The timer opens in its waiting state; an active countdown is not resumed after closing the app. A completed timer shows `Time’s up` and plays two three-beep phrases. Reset or configuring a new time stops the alert.
+## Record
+
+Switch to Record and use `+` to enter a title and choose a currently running program. Register up to five different executable paths. The dropdown refreshes whenever you open it; start the target program first if it is absent. Chips show your titles. Right-click for Edit/Remove.
+
+Each program automatically accumulates time while one of its windows is in the foreground. There is no start/pause action. Selecting a chip changes the displayed total; all registered programs remain eligible for tracking. Switching between Timer and Record keeps both features running. Reset clears only the displayed record. Closing and reopening a target program continues the same record when its executable path matches.
+
+The clock displays `hh:mm:ss` within the current day. At 24 hours it wraps to `00:00:00` with a small `1d` badge inside the panel; seven days becomes `1w`, then `1w 1d`. The badge does not move the clock or controls. The app must remain open to measure time; sleep, lock and closed-app time do not accrue. Foreground means the active program, including time it remains focused without keyboard input.
+
+Theme, timer presets, registered programs, accumulated record time and the latest configured time are stored in `B01Timer.ini` beside `B01Timer.exe`. The INI is created on first launch; keep the EXE in a folder you can write to. Moving this folder keeps your presets and settings with the app. If an older `%LOCALAPPDATA%\B01Timer\settings.json` exists and no portable INI exists yet, its settings are imported once; the original JSON is kept. The timer opens in its waiting state; an active countdown is not resumed after closing the app. A completed timer shows `Time’s up` and plays two three-beep phrases. Reset or configuring a new time stops the alert.
 
 ## Build and verification
 
-Requires the .NET 10 SDK. On Windows, run `./scripts/build.ps1`. It runs the core checks and publishes a self-contained single EXE to `artifacts/publish`. `./scripts/qa-ui.ps1 -ExePath ./artifacts/publish/B01Timer.exe` independently operates the real Windows UI and captures screenshots.
+Requires the .NET 10 SDK. On Windows, run `./scripts/build.ps1`. It runs the core checks and publishes a self-contained single EXE to `artifacts/publish`. `./scripts/qa-ui.ps1 -ExePath ./artifacts/publish/B01Timer.exe` independently operates the real Windows UI and captures screenshots. `./scripts/qa-record.ps1 -ExePath ./artifacts/publish/B01Timer.exe` opens five distinct probe programs and verifies actual foreground tracking, tab switching, reset, restart, registration limit and day/week badges.
 
-GitHub Actions builds the Windows executable and runs UI verification for application, test or build-script changes on main and for pull requests. Use the workflow's **Run workflow** action on main for a delivery build at any time. Each successful main build automatically publishes the EXE, verified ZIP, SHA256 checksums and license notices to GitHub Releases. Pull request builds only produce verification artifacts. Screenshot and GUI check results are also retained as Actions artifacts.
+GitHub Actions builds the Windows executable and runs UI verification for application, test or build-script changes on main and for pull requests. Use the workflow's **Run workflow** action on main for a delivery build at any time. Each successful main build automatically publishes only the verified ZIP to GitHub Releases. The ZIP contains the EXE, both license documents and SHA256SUMS.txt; older separate EXE/checksum/license release assets are removed after a successful update. Pull request builds only produce verification artifacts. Screenshot and GUI check results are also retained as Actions artifacts.
 
 The release version comes from `InformationalVersion` in `src/B01Timer/B01Timer.csproj` (currently `0.1`, with tag `v0.1` and title `Version 0.1`). Set the next version before the next versioned delivery. Rebuilding the same version replaces that release's assets and updates its tag to the successfully verified source commit. A failed test or packaging check prevents release publication. The release notes link to the source commit and Windows verification run.
 
-The UI uses WPF and per-monitor DPI scaling. Pretendard 1.3.9 Regular/SemiBold is embedded in the EXE, including tabular timer digits, so no font installation is required. Buttons have Idle/Hover appearance, a filled Pause glyph and a centered Reset glyph; disabled controls remain visibly disabled. Countdown timing uses a monotonic clock and is independent from UI updates. Settings use readable INI sections and hh:mm:ss values, written through an atomic file replacement.
+The UI uses WPF and per-monitor DPI scaling. Pretendard 1.3.9 Regular/SemiBold is embedded in the EXE, including tabular timer digits, so no font installation is required. Buttons have Idle/Hover appearance, a filled Pause glyph and a centered Reset glyph; disabled controls remain visibly disabled. Countdown timing uses a monotonic clock and is independent from UI updates. Settings use readable INI sections and timer hh:mm:ss values, written through an atomic file replacement. Record sections store Title, ExecutablePath and ElapsedTicks (100ns units), including fractions of a second. Active totals are saved once a second and on graceful close. Play/Pause/Reset share a 20 DIP icon canvas with matched ink diameter and centering; the theme toggle is 36 × 36 DIP.
 
 The source code uses the [MIT license](LICENSE). Icons come from [Reicon](https://reicon.dev/icons?weight=outline); their license notices are included in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt). Design specifications are in [docs/design-spec.md](docs/design-spec.md), and verified delivery results are in [docs/qa-report.md](docs/qa-report.md).
 

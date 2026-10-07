@@ -4,7 +4,7 @@
 
 ## 2026-10-07 앱 수정 이후의 차이
 
-현재 EXE는 Pretendard 1.3.9 Regular/SemiBold를 내장하고 숫자도 Pretendard tabular로 표시한다. 버튼은 Idle/Hover만 사용하며 Pressed opacity, Focus stroke 및 preset Selected 배경은 제거했다. Disabled는 Record와 0초 실행 불가를 위해 유지한다. Pause는 속이 채워진 두 막대, Reset은 실제 ink bounds를 중심으로 24px 캔버스에 배치한다. 완료음은 세 음 묶음을 두 번 재생한다.
+현재 EXE는 Pretendard 1.3.9 Regular/SemiBold를 내장하고 숫자도 Pretendard tabular로 표시한다. 버튼은 Idle/Hover만 사용하며 Pressed opacity, Focus stroke 및 preset Selected 배경은 제거했다. Disabled는 빈 Record Reset, 5개 등록 후 +, 0초 실행 불가를 위해 유지한다. Pause는 속이 채워진 두 막대, Reset은 실제 ink bounds를 중심으로 24px 캔버스에 배치한다. 완료음은 세 음 묶음을 두 번 재생한다.
 
 아래 Figma 구성과 기존 ID는 초기 스냅샷을 설명한다. 현재 파일에는 이전 글꼴·Pressed/Focus/Selected variants가 남아 있으며 MCP 한도로 Figma에서 갱신하지 못했다. 현재 코드의 위 수정 지침이 우선이다. 이전 상태를 코드에 되돌리지 않는다. 이어 실행할 스크립트도 초기 스냅샷 기준이므로 최신 토큰과 버튼 계약에 맞춰 수정한 뒤 사용해야 한다.
 
@@ -84,3 +84,7 @@ Foundations 1200×1761, Component states 1400×2502의 실제 Figma screenshot�
 
 기존 screenshot URL을 로컬로 내려받으려 했지만 실행환경이 `Site Unavailable` HTML을 반환했다. 새 screenshot API는 호출하지 않았다. 짧은 수명의 기존 URL과 검증 메타데이터는 JSON의 visualEvidence에 보존했으며, 대화의 inline screenshot도 검증 근거다. 로컬 PNG 파일이 저장되었다고 주장하지 않는다.
 
+
+## 2026-10-07 Record 구현 변경
+
+현재 앱에는 Record 탭과 최대 5개의 프로그램 제목 칩, Title/Running program 드롭다운을 가진 등록 대화상자, 읽기 전용 누적 시간, Reset-only 하단 액션을 추가했다. day/week badge는 시간 패널 좌측 상단 overlay로 레이아웃을 바꾸지 않는다. Play/Pause는 Reset과 실제 ink 직경·중심을 맞춘 20 DIP canvas이고 Theme 버튼은 36 DIP, glyph canvas 22 DIP다. 이 변경은 source와 design-spec에 반영되어 있으며 Figma 원본 컴포넌트와 새 Record 화면에는 아직 반영하지 못했다. 기존 연결의 MCP quota 제한이 계속 적용되는 상태이고 원본을 업데이트했다고 주장하지 않는다.

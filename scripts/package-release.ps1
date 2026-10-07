@@ -12,11 +12,15 @@ $exe = Join-Path $PublishDirectory 'B01Timer.exe'
 $package = Join-Path $ArtifactDirectory "B01Timer-$Version-windows-x64.zip"
 $files = @($exe, (Join-Path $PublishDirectory 'LICENSE'), (Join-Path $PublishDirectory 'THIRD-PARTY-NOTICES.txt'))
 foreach ($file in $files) { if (-not (Test-Path $file -PathType Leaf)) { throw "Missing release file: $file" } }
+$manifest = Join-Path $PublishDirectory 'SHA256SUMS.txt'
+$manifestLines = foreach ($file in $files) { "{0}  {1}" -f (Get-FileHash $file -Algorithm SHA256).Hash.ToLowerInvariant(), (Split-Path $file -Leaf) }
+$manifestLines | Set-Content -Encoding utf8 $manifest
+$files += $manifest
 Compress-Archive -LiteralPath $files -DestinationPath $package -CompressionLevel Optimal -Force
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $archive = [System.IO.Compression.ZipFile]::OpenRead($package)
 try {
-    if ($archive.Entries.Count -ne 3) { throw 'Release archive must contain EXE and both licenses.' }
+    if ($archive.Entries.Count -ne 4 -or $null -eq $archive.GetEntry('SHA256SUMS.txt')) { throw 'Release archive must contain EXE, both licenses and checksums.' }
     $entry = $archive.GetEntry('B01Timer.exe')
     if ($null -eq $entry) { throw 'Release archive is missing B01Timer.exe.' }
     $stream = $entry.Open()

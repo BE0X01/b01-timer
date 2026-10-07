@@ -13,7 +13,7 @@ if (-not $env:GH_TOKEN -and -not $env:GITHUB_TOKEN) { throw 'GitHub release requ
 Get-Command gh -ErrorAction Stop | Out-Null
 $tag = "v$Version"
 $package = Join-Path $ArtifactDirectory "B01Timer-$Version-windows-x64.zip"
-$assets = @((Join-Path $PublishDirectory 'B01Timer.exe'), $package, (Join-Path $ArtifactDirectory 'SHA256SUMS.txt'), (Join-Path $PublishDirectory 'LICENSE'), (Join-Path $PublishDirectory 'THIRD-PARTY-NOTICES.txt'))
+$assets = @($package)
 foreach ($asset in $assets) { if (-not (Test-Path $asset -PathType Leaf)) { throw "Missing release asset: $asset" } }
 $notesFile = Join-Path $ArtifactDirectory 'release-notes.md'
 $notes = @"
@@ -32,7 +32,7 @@ Windows 64비트용 포터블 타이머예요. ZIP을 풀고 B01Timer.exe를 실
 
 소스: [$Commit](https://github.com/$Repository/commit/$Commit)
 검증: [Windows 빌드 및 QA](https://github.com/$Repository/actions/runs/$env:GITHUB_RUN_ID)
-파일 해시는 SHA256SUMS.txt에서 확인할 수 있어요.
+EXE·라이선스·SHA256SUMS.txt는 ZIP 안에 포함돼요.
 "@
 $notes | Set-Content -Encoding utf8 $notesFile
 function Invoke-ReleaseGh([string[]]$GhArguments) {
@@ -46,6 +46,12 @@ if ($exists) {
     Invoke-ReleaseGh @('api', "repos/$Repository/git/refs/tags/$tag", '--method', 'PATCH', '-f', "sha=$Commit", '-F', 'force=true')
     Invoke-ReleaseGh (@('release', 'upload', $tag, '--repo', $Repository, '--clobber') + $assets)
     Invoke-ReleaseGh @('release', 'edit', $tag, '--repo', $Repository, '--title', "Version $Version", '--notes-file', $notesFile, '--latest')
+    # Keep the release assets ZIP-only; older separate build files are redundant.
+    $existingAssets = & gh release view $tag --repo $Repository --json assets | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0) { throw 'Could not inspect release assets.' }
+    foreach ($name in @('B01Timer.exe', 'SHA256SUMS.txt', 'LICENSE', 'THIRD-PARTY-NOTICES.txt')) {
+        if ($existingAssets.assets.name -contains $name) { Invoke-ReleaseGh @('release', 'delete-asset', $tag, $name, '--repo', $Repository, '--yes') }
+    }
 } else {
     Invoke-ReleaseGh (@('release', 'create', $tag, '--repo', $Repository, '--target', $Commit, '--title', "Version $Version", '--notes-file', $notesFile, '--latest') + $assets)
 }

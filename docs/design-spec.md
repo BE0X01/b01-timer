@@ -1,12 +1,12 @@
 # B01 Timer 디자인 사양 0.1 (2026-10-07 수정)
 
-Timer.png의 위에서 아래로 내려오는 탭 → 시간 즐겨찾기 → 큰 디지털 시간 → 우측 하단 제어 구조를 유지한다. Record는 준비 중인 비활성 버튼이다. 별도 Record 화면이나 레코드 기능은 v1에 만들지 않는다.
+Timer.png의 위에서 아래로 내려오는 탭 → 시간 즐겨찾기 → 큰 디지털 시간 → 우측 하단 제어 구조를 유지한다. Record는 최대 5개의 실행 프로그램에 대해 실제 전경 포커스 시간을 자동 누적하는 활성 탭이다. 탭 전환은 측정 상태를 변경하지 않는다.
 
 ## 윈도우와 레이아웃
 
 - 구현: C# WPF, Windows exe. 전체 창 520 × 360 DIP, 최소 460 × 340 DIP. 100%/150%/200% DPI에서도 DIP 배치를 유지한다.
 - 커스텀 타이틀 바 32 DIP. 좌측 작은 timer outline(14) + `B01 Timer`(12, Semibold); 우측 minimize/maximize/close 각각 42 × 32. 타이틀 바 빈 영역 드래그, 더블클릭 maximize 지원. 창 제어 버튼도 hover surface를 사용한다. 기본 테두리는 1 DIP, 창 모서리 radius 12.
-- 타이틀 바 아래 본문 좌우 padding 24. 상단 y=52, 높이 36: Timer/Record 탭 그룹 왼쪽, 테마 아이콘 버튼(32 × 32) 오른쪽. 탭은 각각 92 × 36, 바깥 radius 10, 안쪽 radius 7.
+- 타이틀 바 아래 본문 좌우 padding 24. 상단 y=52, 높이 36: Timer/Record 탭 그룹 왼쪽, 테마 아이콘 버튼(36 × 36, glyph canvas 22) 오른쪽. 탭은 각각 92 × 36, 바깥 radius 10, 안쪽 radius 7.
 - 즐겨찾기 행 y=104, 높이 32. 칩 간격 8, 첫 칩부터 가로로 배치하고 끝에 +. 칩이 늘면 WrapPanel을 사용하고 창 본문을 수직으로 확장하거나 scroll하여 하단 버튼을 밀어내지 않게 한다. 기본 15/30/60분은 합리적인 초기값이고 이후 사용자 설정을 저장한다.
 - 시간 패널 y=156, 472 × 122, radius 16, 1 DIP border. 중앙에 3개의 클릭 가능한 시간 필드와 콜론 2개. 각 필드 width 92, 콜론 width 24. 숫자 baseline을 맞춘다.
 - 숫자: EXE에 내장한 Pretendard Regular 60, Normal. `Typography.NumeralAlignment="Tabular"`로 숫자 폭을 유지한다. UI의 Regular/SemiBold도 같은 Pretendard 폰트 자산을 사용한다. 중앙 정렬, selection highlight는 accent 배경. 숫자 아래 작은 `HOURS`, `MINUTES`, `SECONDS` 각각 9, letter spacing이 가능하면 1, muted. 콜론은 숫자보다 약간 어둡고 같은 baseline.
@@ -36,11 +36,11 @@ Timer.png의 위에서 아래로 내려오는 탭 → 시간 즐겨찾기 → �
 
 ## 컴포넌트와 상태
 
-- Timer 탭: raised surface + main text + Semibold 13. Record: 투명 배경 + disabled text, 클릭 불가, tooltip `Coming soon`. 진행 상태는 UI 탭과 독립적인 모델에서 보관한다.
+- Timer 탭: raised surface + main text + Semibold 13. Record도 클릭 가능하다. 현재 탭은 raised surface, 다른 탭은 surface 배경을 사용하고 두 탭 모두 main text다. 진행 상태는 UI 탭과 독립적인 모델에서 보관한다.
 - 즐겨찾기 칩: 최소 높이 32, 좌우 padding 12, radius 16, font 12 Semibold, 값 표시는 항상 `hh:mm:ss`(예: 00:25:00). 선택·포커스·눌림은 별도 버튼 외형을 만들지 않는다. Idle은 raised 배경, Hover는 hover surface. 칩을 클릭하면 해당 시간을 설정하고 대기 상태가 되며 자동 실행하지 않는다.
 - +: 32 × 32 원형 또는 radius16, border 1, 16px `add` outline. tooltip `Add preset`.
 - preset 오른쪽 클릭: `Edit`, `Remove` 메뉴. 각각 최소 높이32, 좌우 padding12, 모서리 radius8, surface+border. Remove는 error 텍스트만 사용하고 즉시 제거한다. 활성 시간은 preset 제거와 무관하게 그대로 남아야 한다.
-- Play/Pause: accent solid 배경, accent foreground 22px icon (Play outline / Pause filled), hover accent-hover. 0초에서는 비활성. tooltip/accessibility name을 `Start timer` / `Pause timer`로 바꾼다. Reset: raised 배경, main-text outline. 실제 geometry의 ink center를 24px canvas 중심에 맞춰 배치, tooltip `Reset timer`.
+- Play/Pause: accent solid 배경, accent foreground 20px canvas icon (Play outline / Pause filled), hover accent-hover. 0초에서는 비활성. tooltip/accessibility name을 `Start timer` / `Pause timer`로 바꾼다. Reset: raised 배경, main-text outline. 실제 geometry의 ink center를 24px canvas 중심에 맞춰 배치, tooltip `Reset timer`.
 - 테마 버튼: 배경 투명, hover surface, 18px outline. 현재 Dark일 때 sun(전환 목적 Light), 현재 Light일 때 moon(전환 목적 Dark). tooltip도 `Switch to light theme` / `Switch to dark theme`로 전환한다.
 - Running: status 앞 accent 작은 점 5px, Pause 아이콘. 숫자는 동일 색상. Paused: muted status, Play 아이콘. 완료: `00:00:00`, `Time’s up`, Play로 전환. 너무 큰 완료 팝업은 만들지 않고 세 음(짧음·짧음·길음) 묶음을 두 번 재생한다. 묶음 사이에 380ms를 두고, Reset/새 시간 설정/재시작/창 닫기는 재생을 중단한다.
 
@@ -83,7 +83,18 @@ SVG 자산은 src/B01Timer/Assets에 있다. Filled Pause는 기존 Outline glyp
 ## 접근성 / 최종 QA
 
 - Button, TextBox, Tab 역할을 갖는 실제 WPF control을 사용한다. icon-only control에 AutomationProperties.Name와 tooltip을 설정한다.
-- 키보드 Tab 순서는 Timer → theme → presets → + → hours → minutes → seconds → Play/Pause → Reset. Record는 disabled이므로 skip.
-- 버튼은 Idle/Hover만 사용하고 focus stroke와 pressed opacity는 표시하지 않는다. Record와 0초 Start의 Disabled는 유지한다. 숫자 입력의 Focus ring과 선택 highlight는 편집 위치를 보여주기 위해 유지한다.
+- 키보드 Tab 순서는 Timer → theme → presets → + → hours → minutes → seconds → Play/Pause → Reset. Record 탭도 키보드로 접근할 수 있다. Record에서는 제목 칩 → + → Reset 순서다.
+- 버튼은 Idle/Hover만 사용하고 focus stroke와 pressed opacity는 표시하지 않는다. 빈 Record의 Reset, 5개 등록 시 +, 0초 Start의 Disabled는 유지한다. 숫자 입력의 Focus ring과 선택 highlight는 편집 위치를 보여주기 위해 유지한다.
 - 본문 text는 정상 크기에서 대비 4.5:1 수준을 확보한다. Small label은 muted token을 그대로 사용하고 더 낮은 opacity를 적용하지 않는다.
 - 확인: Dark/Light main+dialog+menu, 긴 preset 목록, 0초 Start disabled, 숫자 carry 입력, pause/reset base, modal 중 timer 지속, 150%/200% DPI의 숫자와 아이콘 clipping.
+
+## Record 화면과 저장 계약
+
+- 초기 칩 행은 +만 표시한다. +는 Title 입력과 Running program 드롭다운을 가진 400 × 340 대화상자를 연다. 두 필드가 필요하고 서로 다른 실행 파일을 최대 5개 등록한다. 드롭다운은 열 때마다 실행 중인 보이는 프로그램 목록을 갱신한다.
+- 프로그램 칩에는 사용자가 입력한 Title이 표시된다. 긴 제목은 줄임표와 tooltip을 사용한다. Edit/Remove 컨텍스트 메뉴를 제공한다. 선택은 보여줄 기록만 바꾸며 모든 등록된 프로그램의 포커스 측정은 계속된다.
+- 시간 패널과 HOURS/MINUTES/SECONDS labels는 Timer와 같은 위치·크기다. Record의 시간은 읽기 전용이며 00:00:00부터 증가한다. 하단에는 Reset만 표시하고 선택한 기록만 초기화한다.
+- 24시간 후 작은 1d 표시와 함께 시·분·초가 00:00:00으로 돌아간다. 7일은 1w, 8일은 1w 1d다. badge는 기존 Grid 안 좌측 상단의 overlay이고 새 행·열·margin을 만들지 않는다.
+- Reset/Play/Pause는 24-unit canvas 안에서 실제 ink의 최대 직경을 Reset에 맞추고 20 DIP Viewbox로 표시한다. 세 glyph의 ink center를 버튼 center에 맞춘다. 테마 버튼은 36 × 36, glyph canvas 22 × 22다.
+- 전경 HWND의 실행 파일 전체 경로를 대소문자 구분 없이 비교한다. 같은 프로그램의 여러 창이나 재실행은 같은 기록을 사용한다. 독립적인 실행 파일 경로의 프로그램을 5개까지 등록할 수 있다. 탭이나 표시할 칩은 측정 조건에 포함되지 않는다.
+- 누적은 100ns tick 단위로 보관하고 표시에서만 초를 내린다. Windows awake clock을 사용하며 sleep/hibernation을 제외한다. 세션 잠금 시 포커스를 해제한다. 앱 종료 중에는 기록하지 않는다.
+- EXE 옆 B01Timer.ini에 [Records] Count, [Record1] 이후 Id/Title/ExecutablePath/ElapsedTicks, [Settings] SelectedRecordId를 추가한다. 기존 Timer 항목과 migration은 보존한다. 활성 누적은 매초 atomic save하고 종료·Reset·등록 수정 시에도 저장한다.

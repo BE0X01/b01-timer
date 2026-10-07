@@ -59,13 +59,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_VERSION: ${{ steps.metadata.outputs.release_version }}
         run: ./scripts/publish-release.ps1 -Version $env:RELEASE_VERSION -Repository $env:GITHUB_REPOSITORY -Commit $env:GITHUB_SHA
-      - name: Upload Windows EXE and licenses
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: B01Timer-windows-x64
-          path: artifacts/publish/
-          if-no-files-found: error
       - name: Upload checked release package
         if: always()
         uses: actions/upload-artifact@v4

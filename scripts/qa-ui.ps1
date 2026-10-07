@@ -69,7 +69,7 @@ function Start-App([switch]$Portable) {
     if ($Portable) {
         $script:Process = Start-Process -FilePath $ExePath -WorkingDirectory $ArtifactDirectory -PassThru
     } else {
-        $script:Process = Start-Process -FilePath $ExePath -ArgumentList @('--settings-dir', ('"' + $script:SettingsDirectory + '"')) -WorkingDirectory $ArtifactDirectory -PassThru
+        $script:Process = Start-Process -FilePath $ExePath -ArgumentList @('--settings-dir', ('"' + $script:SettingsDirectory + '"'), '--diagnostics', ('"' + (Join-Path $ArtifactDirectory 'diagnostics.txt') + '"')) -WorkingDirectory $ArtifactDirectory -PassThru
     }
     $script:Main = Wait-Result { Find-Window }
     [QaNative]::SetForegroundWindow([IntPtr]$script:Main.Current.NativeWindowHandle) | Out-Null
