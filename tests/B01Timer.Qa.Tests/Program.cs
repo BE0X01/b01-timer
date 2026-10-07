@@ -61,14 +61,42 @@ Check(maximumRejected, "Programmatic duration above maximum is rejected");
 string directory = Path.Combine(Path.GetTempPath(), "b01-timer-independent-qa-" + Guid.NewGuid().ToString("N"));
 try
 {
-    var store = new SettingsStore(directory);
+    string legacyPath = Path.Combine(directory, "settings.json");
+    var store = new SettingsStore(directory, legacyPath);
     Check(store.Load().Theme == "dark" && store.Load().Favorites.Count > 0, "First launch returns usable default settings");
     store.Save(new AppSettings { Theme = "light", LastSeconds = 0, Favorites = [] });
     Check(store.Load().Favorites.Count == 0 && store.Load().Theme == "light", "Removing all presets persists without restoring defaults");
-    File.WriteAllText(store.FilePath, "{\"Theme\":null,\"LastSeconds\":-5,\"Favorites\":[null,{\"Id\":\"one\",\"Seconds\":7},{\"Id\":\"one\",\"Seconds\":8},{\"Id\":\"\",\"Seconds\":8}]}");
+    Check(Path.GetFileName(store.FilePath) == "B01Timer.ini", "Settings use the requested B01Timer.ini filename");
+    Check(File.ReadAllText(store.FilePath).Contains("[Settings]") && File.ReadAllText(store.FilePath).Contains("[Presets]"), "Persisted settings use readable INI sections");
+    var original = new AppSettings { Theme = "light", LastSeconds = 3723, Favorites = [new("first", 17), new("second", 19)] };
+    store.Save(original);
+    var roundTrip = store.Load();
+    Check(roundTrip.Theme == "light" && roundTrip.LastSeconds == 3723 && roundTrip.Favorites.SequenceEqual(original.Favorites), "INI round trip preserves theme, configured time and preset order/IDs");
+    Check(File.ReadAllText(store.FilePath).Contains("LastTime=01:02:03") && File.ReadAllText(store.FilePath).Contains("Time=00:00:17"), "INI exposes time values in HH:MM:SS format");
+    File.WriteAllText(store.FilePath, "[Settings]\nTheme=unknown\nLastTime=99:99:99\n[Presets]\nCount=3\n[Preset1]\nId=good\nTime=00:00:07\n[Preset2]\nId=broken\nTime=invalid\n[Preset3]\nId=zero\nTime=00:00:00\n");
+    var sanitizedIni = store.Load();
+    Check(sanitizedIni.Theme == "dark" && sanitizedIni.LastSeconds == 0 && sanitizedIni.Favorites.Count == 1 && sanitizedIni.Favorites[0].Seconds == 7, "Malformed INI values recover and invalid/zero presets are removed");
+    File.WriteAllText(store.FilePath, "not an ini file");
+    Check(store.Load().Theme == "dark" && store.Load().LastSeconds == 0, "Entirely malformed INI recovers without crashing");
+    File.Delete(store.FilePath);
+    File.WriteAllText(legacyPath, "{\"Theme\":null,\"LastSeconds\":-5,\"Favorites\":[null,{\"Id\":\"one\",\"Seconds\":7},{\"Id\":\"one\",\"Seconds\":8},{\"Id\":\"\",\"Seconds\":8}]}");
     var recovered = store.Load();
     Check(recovered.Theme == "dark" && recovered.LastSeconds == 0 && recovered.Favorites.Count == 1 && recovered.Favorites[0].Seconds == 7, "Null, duplicate, empty-ID and negative settings recover safely");
-    Check(!File.Exists(store.FilePath + ".tmp"), "Successful saves do not leave a temporary settings file");
+    string legacyJson = "{\"Theme\":\"light\",\"LastSeconds\":1234,\"Favorites\":[{\"Id\":\"migrated\",\"Seconds\":45}]}";
+    File.WriteAllText(legacyPath, legacyJson);
+    var migrated = store.Load();
+    Check(migrated.Theme == "light" && migrated.LastSeconds == 1234 && migrated.Favorites.Single() == new Favorite("migrated", 45), "Legacy JSON migrates when adjacent INI does not exist");
+    store.Save(migrated);
+    Check(File.Exists(store.FilePath) && File.ReadAllText(legacyPath) == legacyJson, "Migration creates INI while preserving legacy JSON source");
+    File.WriteAllText(legacyPath, "{\"Theme\":\"dark\",\"LastSeconds\":9999,\"Favorites\":[]}");
+    var afterLegacyChange = store.Load();
+    Check(afterLegacyChange.Theme == "light" && afterLegacyChange.LastSeconds == 1234 && afterLegacyChange.Favorites.Count == 1, "Existing INI takes precedence and prevents migration from running twice");
+    File.WriteAllText(store.FilePath, "not an ini file");
+    var corruptedExisting = store.Load();
+    Check(corruptedExisting.Theme == "dark" && corruptedExisting.LastSeconds == 0, "A corrupted existing INI recovers without re-importing old JSON");
+    store.Save(new AppSettings { Theme = "dark", LastSeconds = 0, Favorites = [] });
+    Check(store.Load().Favorites.Count == 0, "Empty INI favorites remain empty even when legacy JSON exists");
+    Check(!Directory.GetFiles(directory, "B01Timer.ini.tmp*").Any(), "Successful saves do not leave a temporary settings file");
 }
 finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
 

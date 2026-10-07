@@ -32,7 +32,7 @@ public partial class MainWindow : Window
         TimeEditor.DurationChanged += ConfigureTime;
         TimeEditor.ValidationChanged += message => { validation = message; UpdateDisplay(); };
         pulse.Tick += (_, _) => { if (timer.Tick()) { SystemSounds.Asterisk.Play(); FlashWindow(new WindowInteropHelper(this).Handle, false); } UpdateDisplay(); };
-        Loaded += (_, _) => { initialized = true; SetDwmAppearance(); RenderPresets(); UpdateThemeButton(); UpdateDisplay(); pulse.Start(); };
+        Loaded += (_, _) => { SaveSettings(); initialized = true; SetDwmAppearance(); RenderPresets(); UpdateThemeButton(); UpdateDisplay(); pulse.Start(); };
         Closed += (_, _) => { pulse.Stop(); SaveSettings(); };
         StateChanged += (_, _) => MaximizeButton.ToolTip = WindowState == WindowState.Maximized ? "Restore" : "Maximize";
         PreviewKeyDown += Window_PreviewKeyDown;

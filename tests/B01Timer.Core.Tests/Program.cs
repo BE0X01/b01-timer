@@ -50,11 +50,26 @@ try
     store.Save(settings);
     var loaded = store.Load();
     Check(loaded.Theme == "light" && loaded.LastSeconds == 1234 && loaded.Favorites.SequenceEqual(settings.Favorites), "Settings round trip preserves theme, initial time and presets");
-    File.WriteAllText(store.FilePath, "invalid json");
+    File.WriteAllText(store.FilePath, "invalid ini");
     Check(store.Load().Theme == "dark", "Damaged settings recover to defaults");
-    File.WriteAllText(store.FilePath, "{\"Theme\":\"unknown\",\"LastSeconds\":9999999,\"Favorites\":[{\"Id\":\"invalid\",\"Seconds\":-1}]}");
+    File.WriteAllText(store.FilePath, "[Settings]\nTheme=unknown\nLastTime=99:99:99\n[Presets]\nCount=1\n[Preset1]\nId=invalid\nTime=-1\n");
     var recovered = store.Load();
-    Check(recovered.Theme == "dark" && recovered.LastSeconds == DurationInput.MaximumSeconds && recovered.Favorites.Count == 0, "Invalid persisted values are sanitized");
+    Check(recovered.Theme == "dark" && recovered.LastSeconds == 0 && recovered.Favorites.Count == 0, "Invalid persisted values are sanitized");
+    Check(Path.GetFileName(store.FilePath) == "B01Timer.ini", "Settings use the portable INI filename");
+    store.Save(settings);
+    string ini = File.ReadAllText(store.FilePath);
+    Check(ini.Contains("LastTime=00:20:34") && ini.Contains("[Preset1]") && ini.Contains("Time=00:00:07"), "INI is readable with sectioned hh:mm:ss times");
+    store.Save(new AppSettings { Favorites = [] });
+    Check(store.Load().Favorites.Count == 0 && File.ReadAllText(store.FilePath).Contains("Count=0"), "Empty preset list remains empty after relaunch");
+    File.Delete(store.FilePath);
+    string legacy = Path.Combine(directory, "settings.json");
+    File.WriteAllText(legacy, "{\"Theme\":\"light\",\"LastSeconds\":1234,\"Favorites\":[{\"Id\":\"migrated\",\"Seconds\":35}]}");
+    var migrating = new SettingsStore(directory, legacy);
+    var imported = migrating.Load(); migrating.Save(imported);
+    Check(imported.Theme == "light" && imported.LastSeconds == 1234 && imported.Favorites[0].Id == "migrated" && File.Exists(legacy), "Legacy JSON imports into INI without deleting the original");
+    File.WriteAllText(legacy, "{\"Theme\":\"dark\",\"LastSeconds\":0,\"Favorites\":[]}");
+    Check(migrating.Load().Theme == "light" && migrating.Load().Favorites[0].Id == "migrated", "Existing INI prevents repeated legacy migration");
+    Check(Directory.GetFiles(directory, "*.tmp-*").Length == 0, "Atomic saves clean up temporary files");
 }
 finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
 Console.WriteLine($"{checks} checks passed.");

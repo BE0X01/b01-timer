@@ -1,10 +1,10 @@
-# B01 Timer
+# B01 Timer 0.1
 
 A minimal Windows timer with editable hours, minutes and seconds, reusable presets, and light/dark themes. Record is reserved for a future update and is currently disabled.
 
 ## Run
 
-Download the Windows x64 build, then run `B01Timer.exe`. No installation or .NET runtime installation is needed. Windows 10/11 x64 is supported.
+Download the ZIP from [GitHub Releases](https://github.com/BE0X01/b01-timer/releases/latest), extract it, then run `B01Timer.exe`. No installation or .NET runtime installation is needed. Windows 10/11 x64 is supported.
 
 - Click a time field and type digits. `40` in Hours sets 40 hours; `408` in Minutes sets 04:08; `123000` in Seconds sets 12:30:00.
 - Press Enter or move focus to confirm. Escape restores the previous input. Minutes and seconds normalize overflow; the maximum time is 99:59:59.
@@ -14,14 +14,16 @@ Download the Windows x64 build, then run `B01Timer.exe`. No installation or .NET
 - Space starts/pauses when you are outside a time input. Ctrl+R resets.
 - The top-right sun/moon button switches themes.
 
-Theme, presets and the latest configured time are stored in `%LOCALAPPDATA%\B01Timer\settings.json`. The timer opens in its waiting state; an active countdown is not resumed after closing the app. A completed timer shows `Time’s up` and plays a short system sound.
+Theme, presets and the latest configured time are stored in `B01Timer.ini` beside `B01Timer.exe`. The INI is created on first launch; keep the EXE in a folder you can write to. Moving this folder keeps your presets and settings with the app. If an older `%LOCALAPPDATA%\B01Timer\settings.json` exists and no portable INI exists yet, its settings are imported once; the original JSON is kept. The timer opens in its waiting state; an active countdown is not resumed after closing the app. A completed timer shows `Time’s up` and plays a short system sound.
 
 ## Build and verification
 
 Requires the .NET 10 SDK. On Windows, run `./scripts/build.ps1`. It runs the core checks and publishes a self-contained single EXE to `artifacts/publish`. `./scripts/qa-ui.ps1 -ExePath ./artifacts/publish/B01Timer.exe` independently operates the real Windows UI and captures screenshots.
 
-GitHub Actions builds the Windows executable and runs UI verification for pushes to main and pull requests. Artifacts contain the EXE, required license notices, screenshots and GUI check results.
+GitHub Actions builds the Windows executable and runs UI verification for application, test or build-script changes on main and for pull requests. Use the workflow's **Run workflow** action on main for a delivery build at any time. Each successful main build automatically publishes the EXE, verified ZIP, SHA256 checksums and license notices to GitHub Releases. Pull request builds only produce verification artifacts. Screenshot and GUI check results are also retained as Actions artifacts.
 
-The UI uses WPF and per-monitor DPI scaling. Countdown timing uses a monotonic clock and is independent from UI updates. Settings are written as an atomic JSON file replacement.
+The release version comes from `InformationalVersion` in `src/B01Timer/B01Timer.csproj` (currently `0.1`, with tag `v0.1`). Set the next version before the next versioned delivery. Rebuilding the same version replaces that release's assets and updates its tag to the successfully verified source commit. A failed test or packaging check prevents release publication. The release notes link to the source commit and Windows verification run.
+
+The UI uses WPF and per-monitor DPI scaling. Countdown timing uses a monotonic clock and is independent from UI updates. Settings use readable INI sections and hh:mm:ss values, written through an atomic file replacement.
 
 The source code uses the [MIT license](LICENSE). Outline icons come from [Reicon](https://reicon.dev/icons?weight=outline); their license notices are included in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt). Design specifications are in [docs/design-spec.md](docs/design-spec.md).

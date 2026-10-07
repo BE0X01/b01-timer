@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$ExePath,
-    [string]$ArtifactDirectory = (Join-Path $PSScriptRoot '../artifacts/qa-ui')
+    [string]$ArtifactDirectory = (Join-Path $PSScriptRoot '../artifacts/qa-ui'),
+    [string]$ExpectedFileVersion = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -18,10 +19,19 @@ public static class QaNative {
 $ExePath = (Resolve-Path $ExePath).Path
 New-Item -ItemType Directory -Force -Path $ArtifactDirectory | Out-Null
 $ArtifactDirectory = (Resolve-Path $ArtifactDirectory).Path
+if (-not $ExpectedFileVersion) {
+    [xml]$project = Get-Content -Raw (Join-Path $PSScriptRoot '../src/B01Timer/B01Timer.csproj')
+    $ExpectedFileVersion = [string]$project.Project.PropertyGroup.FileVersion
+}
 $script:Results = [System.Collections.Generic.List[object]]::new()
 $script:Process = $null
 $script:Main = $null
 $script:SettingsDirectory = Join-Path $ArtifactDirectory 'settings'
+$script:LegacyJsonPath = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'B01Timer/settings.json'
+$script:LegacyTouched = $false
+$script:LegacyHadFile = $false
+$script:LegacyOriginalBytes = $null
+$script:LegacyDirectoryExisted = $true
 
 function Wait-Result([scriptblock]$Probe, [int]$TimeoutMilliseconds = 10000) {
     $watch = [System.Diagnostics.Stopwatch]::StartNew()
@@ -55,8 +65,12 @@ function Find-Window([string]$Name = '') {
     return [System.Windows.Automation.AutomationElement]::RootElement.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $condition)
 }
 
-function Start-App {
-    $script:Process = Start-Process -FilePath $ExePath -ArgumentList @('--settings-dir', ('"' + $script:SettingsDirectory + '"')) -PassThru
+function Start-App([switch]$Portable) {
+    if ($Portable) {
+        $script:Process = Start-Process -FilePath $ExePath -WorkingDirectory $ArtifactDirectory -PassThru
+    } else {
+        $script:Process = Start-Process -FilePath $ExePath -ArgumentList @('--settings-dir', ('"' + $script:SettingsDirectory + '"')) -WorkingDirectory $ArtifactDirectory -PassThru
+    }
     $script:Main = Wait-Result { Find-Window }
     [QaNative]::SetForegroundWindow([IntPtr]$script:Main.Current.NativeWindowHandle) | Out-Null
     Start-Sleep -Milliseconds 250
@@ -184,6 +198,9 @@ function Capture-Window([string]$Name, $Window = $script:Main) {
 
 try {
     Start-App
+    $overrideIni = Join-Path $script:SettingsDirectory 'B01Timer.ini'
+    Wait-Result { Test-Path $overrideIni } | Out-Null
+    Check (Test-Path $overrideIni) 'Settings override creates B01Timer.ini in the requested test folder'
     Check (-not (Get-Control 'RecordTab').Current.IsEnabled) 'Record is disabled'
     Set-Time '000000'
     Check (-not (Get-Control 'StartPauseButton').Current.IsEnabled) 'Zero seconds cannot start'
@@ -324,6 +341,64 @@ try {
     Check ((Get-Control 'StatusText').Current.Name -match 'Time') 'Completion status is visible'
     Press-Button 'ResetButton'
     Check-Time '00:00:02' 'Reset after completion restores duration'
+
+    # Test the real default storage location by copying only the standalone EXE,
+    # launching without --settings-dir, and using a different working directory.
+    Stop-App
+    $portableDirectory = Join-Path $ArtifactDirectory 'portable'
+    New-Item -ItemType Directory -Force -Path $portableDirectory | Out-Null
+    $portableExe = Join-Path $portableDirectory 'B01Timer.exe'
+    Copy-Item -Force -Path $ExePath -Destination $portableExe
+    $ExePath = $portableExe
+    $portableIni = Join-Path $portableDirectory 'B01Timer.ini'
+    if (Test-Path $portableIni) { Remove-Item -Force $portableIni }
+    $script:LegacyDirectoryExisted = Test-Path (Split-Path $script:LegacyJsonPath -Parent)
+    $script:LegacyHadFile = Test-Path $script:LegacyJsonPath
+    if ($script:LegacyHadFile) { $script:LegacyOriginalBytes = [IO.File]::ReadAllBytes($script:LegacyJsonPath) }
+    New-Item -ItemType Directory -Force -Path (Split-Path $script:LegacyJsonPath -Parent) | Out-Null
+    $legacyJson = '{"Theme":"dark","LastSeconds":3723,"Favorites":[{"Id":"qa-legacy","Seconds":45}]}'
+    $script:LegacyTouched = $true
+    [IO.File]::WriteAllText($script:LegacyJsonPath, $legacyJson)
+    Start-App -Portable
+    Wait-Result { Test-Path $portableIni } | Out-Null
+    Check (Test-Path $portableIni) 'Default first launch creates INI next to the copied EXE'
+    Check (-not (Test-Path (Join-Path $ArtifactDirectory 'B01Timer.ini'))) 'Default INI uses the EXE folder rather than the working directory'
+    Check-Time '01:02:03' 'Default first launch migrates configured time from AppData JSON'
+    Check ($null -ne (Preset-Named '00:00:45') -and @(Get-Presets).Count -eq 1) 'Default first launch migrates legacy preset'
+    Check ([IO.File]::ReadAllText($script:LegacyJsonPath) -eq $legacyJson) 'Migration preserves the legacy JSON file unchanged'
+    $actualFileVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo($ExePath).FileVersion
+    Check ($actualFileVersion -eq $ExpectedFileVersion) 'Windows executable declares the configured release version' "expected=$ExpectedFileVersion actual=$actualFileVersion"
+    Set-Time '040506'
+    Press-Button 'ThemeButton'
+    $portableTheme = (Get-Control 'ThemeButton').Current.Name
+    Press-Button 'AddPresetButton'
+    $dialog = Wait-Result { Find-Window 'Add preset' }
+    Enter-Field 'PresetSecondsInput' '000037' $dialog '{TAB}'
+    Press-Button 'PresetSaveButton' $dialog
+    Wait-Result { Preset-Named '00:00:37' } | Out-Null
+    $iniText = [IO.File]::ReadAllText($portableIni)
+    Check ($iniText -match '(?m)^\[Settings\]' -and $iniText -match '(?m)^\[Presets\]') 'Portable settings are readable INI sections'
+    Check ($iniText -match '(?m)^LastTime\s*=\s*04:05:06\s*$') 'Portable INI stores the configured time'
+    Check ($iniText -match '(?m)^Theme\s*=\s*light\s*$') 'Portable INI stores the selected theme'
+    Check ($iniText -match '(?m)^Count\s*=\s*2\s*$' -and $iniText -match '(?m)^Time\s*=\s*00:00:37\s*$') 'Portable INI stores favorites'
+    Capture-Window 'portable-ini-main'
+    Stop-App
+    [IO.File]::WriteAllText($script:LegacyJsonPath, '{"Theme":"dark","LastSeconds":0,"Favorites":[]}')
+    Start-App -Portable
+    Check-Time '04:05:06' 'Portable configured time survives relaunch and ignores changed legacy JSON'
+    Check ((Get-Control 'ThemeButton').Current.Name -eq $portableTheme) 'Portable theme survives relaunch'
+    Check ($null -ne (Preset-Named '00:00:37') -and $null -ne (Preset-Named '00:00:45') -and @(Get-Presets).Count -eq 2) 'Portable favorites survive relaunch without a second migration'
+    Stop-App
+    [IO.File]::WriteAllText($portableIni, "[Settings]`r`nTheme=dark`r`nLastTime=00:00:08`r`n[Presets]`r`nCount=0`r`n")
+    Start-App -Portable
+    Check (@(Get-Presets).Count -eq 0) 'An INI with Count=0 keeps favorites empty'
+    Check-Time '00:00:08' 'A readable edited INI loads its configured time'
+    Stop-App
+    [IO.File]::WriteAllText($portableIni, "[Settings]`r`nTheme=unknown`r`nLastTime=invalid`r`n[Presets]`r`nCount=1`r`n[Preset1]`r`nId=broken`r`nTime=invalid`r`n")
+    Start-App -Portable
+    Check-Time '00:00:00' 'Invalid INI time recovers safely on actual Windows launch'
+    Check ((Get-Control 'ThemeButton').Current.Name -eq 'Switch to light theme') 'Invalid INI theme recovers to Dark'
+    Check (@(Get-Presets).Count -eq 0) 'Invalid INI preset is discarded without crashing'
     Write-Output "$($script:Results.Count) independent UI checks passed."
 } catch {
     $script:Results.Add([pscustomobject]@{ name = 'Unhandled test failure'; passed = $false; detail = $_.Exception.ToString() })
@@ -342,4 +417,12 @@ try {
 } finally {
     $script:Results | ConvertTo-Json -Depth 5 | Set-Content -Encoding UTF8 (Join-Path $ArtifactDirectory 'results.json')
     Stop-App
+    if ($script:LegacyTouched) {
+        if ($script:LegacyHadFile) { [IO.File]::WriteAllBytes($script:LegacyJsonPath, $script:LegacyOriginalBytes) }
+        else { Remove-Item -Force -ErrorAction SilentlyContinue $script:LegacyJsonPath }
+        if (-not $script:LegacyDirectoryExisted) {
+            $legacyDirectory = Split-Path $script:LegacyJsonPath -Parent
+            if ((Get-ChildItem -Force $legacyDirectory | Measure-Object).Count -eq 0) { Remove-Item -Force $legacyDirectory }
+        }
+    }
 }

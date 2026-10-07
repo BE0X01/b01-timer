@@ -1,26 +1,61 @@
-name: Build and verify Windows app
+name: Build, verify and release Windows app
 on:
   push:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'scripts/**'
+      - '.github/workflows/windows-build.yml'
+      - 'LICENSE'
+      - 'THIRD-PARTY-NOTICES.txt'
   pull_request:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: b01-timer-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   windows:
     runs-on: windows-latest
     timeout-minutes: 20
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+      - name: Read release version
+        id: metadata
+        shell: pwsh
+        run: |
+          [xml]$project = Get-Content ./src/B01Timer/B01Timer.csproj
+          $version = [string]$project.Project.PropertyGroup.InformationalVersion
+          if (-not $version) { $version = [string]$project.Project.PropertyGroup.Version }
+          if ($version -notmatch '^\d+\.\d+(?:\.\d+)?(?:-[A-Za-z0-9.-]+)?$') { throw 'Invalid release version.' }
+          "release_version=$version" | Add-Content -Encoding utf8 $env:GITHUB_OUTPUT
       - name: Test and build standalone EXE
         shell: pwsh
         run: ./scripts/build.ps1
       - name: Verify actual Windows GUI
         shell: powershell
         run: ./scripts/qa-ui.ps1 -ExePath ./artifacts/publish/B01Timer.exe
+      - name: Package and check release files
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ steps.metadata.outputs.release_version }}
+        run: ./scripts/package-release.ps1 -Version $env:RELEASE_VERSION
+      - name: Publish GitHub release
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ steps.metadata.outputs.release_version }}
+        run: ./scripts/publish-release.ps1 -Version $env:RELEASE_VERSION -Repository $env:GITHUB_REPOSITORY -Commit $env:GITHUB_SHA
       - name: Upload Windows EXE and licenses
         if: always()
         uses: actions/upload-artifact@v4
@@ -28,6 +63,15 @@ jobs:
           name: B01Timer-windows-x64
           path: artifacts/publish/
           if-no-files-found: error
+      - name: Upload checked release package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B01Timer-release-package
+          path: |
+            artifacts/B01Timer-*-windows-x64.zip
+            artifacts/SHA256SUMS.txt
+          if-no-files-found: warn
       - name: Upload independent GUI checks and screenshots
         if: always()
         uses: actions/upload-artifact@v4
