@@ -94,8 +94,15 @@ public partial class MainWindow : Window
     }
     private void UpdateDisplay()
     {
-        if (!TimeEditor.IsEditing) TimeEditor.Seconds = timer.DisplaySeconds;
         bool running = timer.State == CountdownState.Running;
+        // Keep the live clock separate from editable TextBoxes/IME/UIA text stores.
+        // Inputs receive values only when the countdown is paused or waiting.
+        if (!running && !TimeEditor.IsEditing) TimeEditor.Seconds = timer.DisplaySeconds;
+        TimeEditor.Visibility = recordView || running ? Visibility.Collapsed : Visibility.Visible;
+        RecordDisplay.Visibility = recordView || running ? Visibility.Visible : Visibility.Collapsed;
+        foreach (var digit in new[] { RecordHours, RecordMinutes, RecordSeconds })
+        { digit.IsHitTestVisible = !recordView; digit.Cursor = recordView ? Cursors.Arrow : Cursors.IBeam; }
+        if (running && !recordView) ShowClock(DurationInput.Format(timer.DisplaySeconds), "");
         StartPauseIcon.Data = running ? pauseIcon : playIcon;
         string action = running ? "Pause timer" : "Start timer";
         StartPauseButton.ToolTip = action; AutomationProperties.SetName(StartPauseButton, action);
@@ -104,8 +111,7 @@ public partial class MainWindow : Window
         {
             var record = settings.Records.Find(r => r.Id == settings.SelectedRecordId);
             var duration = RecordDuration.FromTicks(record?.ElapsedTicks ?? 0);
-            string[] parts = duration.Time.Split(':'); RecordHours.Text = parts[0]; RecordMinutes.Text = parts[1]; RecordSeconds.Text = parts[2]; RecordDays.Text = duration.Days;
-            AutomationProperties.SetName(RecordDisplay, duration.Time);
+            ShowClock(duration.Time, duration.Days);
             bool active = record is not null && string.Equals(record.ExecutablePath, recorder.ForegroundPath, StringComparison.OrdinalIgnoreCase);
             StatusDot.Visibility = active && validation.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
             StatusText.Text = validation.Length > 0 ? validation : record is null ? "Add a program to track" : active ? "Recording · " + record.Title : "Waiting for focus · " + record.Title;
@@ -117,6 +123,18 @@ public partial class MainWindow : Window
         StatusDot.Visibility = running && validation.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
         StatusText.Text = validation.Length > 0 ? validation : timer.State switch { CountdownState.Running => "Running", CountdownState.Paused => "Paused", CountdownState.Finished => "Time’s up", _ => "Ready" };
         SetStatusBrush(validation.Length > 0 ? "ErrorBrush" : timer.State == CountdownState.Finished ? "AccentBrush" : "MutedBrush");
+    }
+    private void ShowClock(string time, string days)
+    {
+        string[] parts = time.Split(':'); RecordHours.Text = parts[0]; RecordMinutes.Text = parts[1]; RecordSeconds.Text = parts[2]; RecordDays.Text = days;
+        AutomationProperties.SetName(RecordDisplay, time);
+    }
+    private void ClockDigit_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (recordView) return;
+        timer.Pause(); UpdateDisplay();
+        TimeEditor.FocusField(Enum.Parse<TimeField>((string)((TextBlock)sender).Tag));
+        e.Handled = true;
     }
     private void SetStatusBrush(string brush)
     {

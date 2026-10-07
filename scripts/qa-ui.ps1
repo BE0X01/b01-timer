@@ -116,6 +116,9 @@ function Enter-Field([string]$Id, [string]$Text, $Window = $script:Main, [string
 }
 
 function Get-Time($Window = $script:Main, [string]$Prefix = '') {
+    if (-not $Prefix -and (Find-Element $Window 'StatusText').Current.Name -eq 'Running') {
+        return "$( (Get-Control 'RecordHours' $Window).Current.Name ):$( (Get-Control 'RecordMinutes' $Window).Current.Name ):$( (Get-Control 'RecordSeconds' $Window).Current.Name )"
+    }
     return "$(Get-Value ($Prefix + 'HoursInput') $Window):$(Get-Value ($Prefix + 'MinutesInput') $Window):$(Get-Value ($Prefix + 'SecondsInput') $Window)"
 }
 

@@ -79,6 +79,11 @@ public partial class DurationEditor : UserControl
         else if (e.Key == Key.Escape) { editing = null; seconds = editBase; UpdateFields(); ClearValidation(); Keyboard.ClearFocus(); EscapeCanceled?.Invoke(); e.Handled = true; }
         else if (e.Key == Key.Space) e.Handled = true;
     }
-    public void FocusMinutes() { MinutesInput.Focus(); MinutesInput.SelectAll(); }
+    public void FocusField(TimeField field)
+    {
+        var box = field switch { TimeField.Hours => HoursInput, TimeField.Minutes => MinutesInput, _ => SecondsInput };
+        box.Focus(); box.SelectAll();
+    }
+    public void FocusMinutes() => FocusField(TimeField.Minutes);
     public void ClearValidation() { hasValidationError = false; ValidationChanged?.Invoke(""); }
 }

@@ -158,7 +158,7 @@ public static class RecordProbe {
     $input = Control 'SecondsInput'; $input.SetFocus(); [Windows.Forms.SendKeys]::SendWait('^a30{ENTER}'); Invoke 'StartPauseButton'
     Invoke 'RecordTab'; $before = Record-Ticks 1; Focus-Probe 0; Start-Sleep -Milliseconds 1500
     Invoke 'TimerTab'
-    $remaining = (Control 'SecondsInput').GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).Current.Value
+    $remaining = (Control 'RecordSeconds').Current.Name
     Check ([int]$remaining -lt 30) 'Countdown keeps running on Record tab'
     Focus-Probe 1; Start-Sleep -Milliseconds 1500; Invoke 'RecordTab'; Invoke 'RecordChip_1'
     Check ((Display-Time) -ne '00:00:00' -and (Record-Ticks 1) -gt $before) 'Record keeps accumulating across both tabs'
