@@ -1,8 +1,35 @@
 # B01 Timer QA 보고서
 
-## Version 0.2 검증
+## Version 0.2 시간표시 수정 검증
 
-검증일: 2026-10-07. 소스 [956348b7ea258ec64d770f62bbb94504b9c8352e](https://github.com/BE0X01/b01-timer/commit/956348b7ea258ec64d770f62bbb94504b9c8352e)를 [Actions 실행 37584619801](https://github.com/BE0X01/b01-timer/actions/runs/37584619801)에서 빌드·검증한 뒤 [Version 0.2](https://github.com/BE0X01/b01-timer/releases/tag/v0.2)로 게시했어요. `v0.2` 태그의 commit도 검증 소스와 일치해요. 기능·UI는 변경하지 않고 버전 메타데이터와 관련 문서만 갱신했어요.
+검증일: 2026-10-07. 소스 [5b804e3bdb4d2e2d458f4b7ff4a9aa20defef2b9](https://github.com/BE0X01/b01-timer/commit/5b804e3bdb4d2e2d458f4b7ff4a9aa20defef2b9)를 [Actions 실행 37586932079](https://github.com/BE0X01/b01-timer/actions/runs/37586932079)에서 빌드·검증한 뒤 기존 [Version 0.2](https://github.com/BE0X01/b01-timer/releases/tag/v0.2)와 ZIP을 수정본으로 갱신했어요. `v0.2` 태그는 이 검증 소스를 가리키고 EXE FileVersion은 `0.2.0.0`이에요.
+
+Timer의 대기·정지와 실행, Record의 대기와 측정이 같은 숫자·콜론·라벨 표시 트리를 사용해요. 대기 숫자를 그리던 TextBox 내부 2 DIP 테두리는 편집 내용과 별도 장식 overlay로 분리하여 baseline을 밀지 않게 했어요. Running에서는 입력 control을 Collapsed하여 기존 IME/UIA text-store 정지 회피를 유지해요.
+
+| 구분 | 통과 |
+| --- | --- |
+| Core | 57개 |
+| 독립 QA Core | 39개 |
+| Windows WPF appearance | 24개 |
+| 실제 Timer GUI | 66개 |
+| 실제 Record GUI | 26개 |
+
+총 212개가 통과했고 실패는 0개예요. 같은 `12:34:56`의 대기·실행·정지·Record 대기·측정·재개·편집 종료 후 복귀, 총 7개 상태의 324 × 100 clock 영역 RGBA 픽셀이 완전히 같아요. Hours와 Tab으로 이동한 Minutes의 2자리 편집을 포함한 9개 화면에서도 세 숫자의 실제 ink bounds가 모두 동일했어요. 실제 EXE의 숫자 클릭·Tab·Enter, 실행 중 숫자 클릭 후 일시정지·입력 focus, live countdown 회귀도 통과했어요. 디자이너는 Windows PNG 11개를 검토하고 시간표시 통일 계약을 승인했어요.
+
+게시 [B01Timer-0.2-windows-x64.zip](https://github.com/BE0X01/b01-timer/releases/download/v0.2/B01Timer-0.2-windows-x64.zip)은 61,545,720 bytes예요. 직접 다운로드한 ZIP의 CRC, 네 파일(`B01Timer.exe`, `LICENSE`, `THIRD-PARTY-NOTICES.txt`, `SHA256SUMS.txt`), manifest의 세 파일 hash를 확인했고 내부 EXE hash는 QA가 검증한 빌드 EXE와 일치해요.
+
+| 파일 | 확인한 SHA256 |
+| --- | --- |
+| B01Timer-0.2-windows-x64.zip | `4a3aa4249165c8b91cd8d3a03a2b551fc4d787fba3824eded4239762f85d5a7b` |
+| B01Timer.exe | `2d96de29688323248fc134db850257cb3be66259638a75af3595fded810775dc` |
+
+아래에 기록한 최대화 하단 버튼 가시성, 실제 절전·최대절전·세션 잠금, 스피커 청취, 150%/200% 화면 배율과 기존 Figma 갱신의 검증 한계는 유지해요.
+
+## 이전 Version 0.2 검증 (첫 빌드)
+
+다음은 최초 0.2 게시 시점의 역사적 증거예요. 현재 `v0.2` 태그와 다운로드 ZIP은 위 시간표시 수정본으로 갱신됐어요.
+
+검증일: 2026-10-07. 소스 [956348b7ea258ec64d770f62bbb94504b9c8352e](https://github.com/BE0X01/b01-timer/commit/956348b7ea258ec64d770f62bbb94504b9c8352e)를 [Actions 실행 37584619801](https://github.com/BE0X01/b01-timer/actions/runs/37584619801)에서 빌드·검증한 뒤 [Version 0.2](https://github.com/BE0X01/b01-timer/releases/tag/v0.2)로 게시했어요. 당시 `v0.2` 태그의 commit도 검증 소스와 일치했어요. 기능·UI는 변경하지 않고 버전 메타데이터와 관련 문서만 갱신했어요.
 
 Windows 검증은 총 199개가 통과했고 실패는 0개예요. QA가 로그와 실제 Timer/Record 결과 JSON을 독립 확인했으며 자동 검사와 일반 창 크기 화면 검토에서 실패는 없어요.
 
