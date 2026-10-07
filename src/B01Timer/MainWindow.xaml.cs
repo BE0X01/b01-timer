@@ -17,7 +17,9 @@ public partial class MainWindow : Window
     private readonly CountdownTimer timer = new();
     private readonly AppSettings settings;
     private readonly SettingsStore store;
-    private readonly DispatcherTimer pulse = new(DispatcherPriority.Normal) { Interval = TimeSpan.FromMilliseconds(50) };
+    private readonly System.Threading.Timer pulse;
+    private int pulseQueued;
+    private volatile bool closed;
     private readonly CompletionAlarm alarm = new();
     private readonly FocusRecorder recorder;
     private ForegroundPrograms? foreground;
@@ -45,8 +47,35 @@ public partial class MainWindow : Window
         TimeEditor.EditingStarted += () => { timer.Pause(); UpdateDisplay(); };
         TimeEditor.DurationChanged += ConfigureTime;
         TimeEditor.ValidationChanged += message => { validation = message; UpdateDisplay(); };
-        pulse.Tick += (_, _) =>
+        pulse = new(_ => QueuePulse(), null, System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
+        Loaded += (_, _) =>
         {
+            App.Diagnostic?.Invoke("Loaded start");
+            SaveSettings(); initialized = true; SetDwmAppearance(); RenderPresets(); RenderRecords(); UpdateThemeButton(); UpdateDisplay();
+            App.Diagnostic?.Invoke("foreground construction");
+            pulse.Change(0, 50); foreground = new(new WindowInteropHelper(this).Handle); App.Diagnostic?.Invoke("foreground created"); foreground.Changed += path => recorder.SetForeground(path); foreground.Sample();
+            App.Diagnostic?.Invoke("Loaded end pulse=active");
+        };
+        Closed += (_, _) => { closed = true; pulse.Dispose(); recorder.SetForeground(null); foreground?.Dispose(); alarm.Dispose(); SaveSettings(); };
+        StateChanged += (_, _) => MaximizeButton.ToolTip = WindowState == WindowState.Maximized ? "Restore" : "Maximize";
+        PreviewKeyDown += Window_PreviewKeyDown;
+    }
+
+    private void QueuePulse()
+    {
+        if (closed || Interlocked.Exchange(ref pulseQueued, 1) != 0) return;
+        try
+        {
+            Dispatcher.BeginInvoke(DispatcherPriority.Send, new Action(() =>
+            {
+                Interlocked.Exchange(ref pulseQueued, 0);
+                if (!closed) OnPulse();
+            }));
+        }
+        catch (InvalidOperationException) { Interlocked.Exchange(ref pulseQueued, 0); }
+    }
+    private void OnPulse()
+    {
             if (diagnosticTicks++ < 3) App.Diagnostic?.Invoke("pulse " + diagnosticTicks + " editing=" + TimeEditor.IsEditing + " remaining=" + timer.RemainingSeconds);
             if (timer.Tick()) { alarm.Play(); FlashWindow(new WindowInteropHelper(this).Handle, false); }
             if (settings.Records.Count > 0)
@@ -58,18 +87,6 @@ public partial class MainWindow : Window
             }
             if (diagnosticTicks % 20 == 0) App.Diagnostic?.Invoke("pulse " + diagnosticTicks + " editing=" + TimeEditor.IsEditing + " remaining=" + timer.RemainingSeconds + " state=" + timer.State);
             UpdateDisplay();
-        };
-        Loaded += (_, _) =>
-        {
-            App.Diagnostic?.Invoke("Loaded start");
-            SaveSettings(); initialized = true; SetDwmAppearance(); RenderPresets(); RenderRecords(); UpdateThemeButton(); UpdateDisplay();
-            App.Diagnostic?.Invoke("foreground construction");
-            pulse.Start(); foreground = new(new WindowInteropHelper(this).Handle); App.Diagnostic?.Invoke("foreground created"); foreground.Changed += path => recorder.SetForeground(path); foreground.Sample();
-            App.Diagnostic?.Invoke("Loaded end pulse=" + pulse.IsEnabled);
-        };
-        Closed += (_, _) => { pulse.Stop(); recorder.SetForeground(null); foreground?.Dispose(); alarm.Dispose(); SaveSettings(); };
-        StateChanged += (_, _) => MaximizeButton.ToolTip = WindowState == WindowState.Maximized ? "Restore" : "Maximize";
-        PreviewKeyDown += Window_PreviewKeyDown;
     }
 
     private static Geometry CenterIcon(Geometry source, double diameter)
@@ -147,7 +164,7 @@ public partial class MainWindow : Window
         alarm.Stop();
         if (timer.State == CountdownState.Running) timer.Pause(); else timer.Start();
         validation = ""; UpdateDisplay();
-        App.Diagnostic?.Invoke("StartPause state=" + timer.State + " remaining=" + timer.RemainingSeconds + " editing=" + TimeEditor.IsEditing + " pulse=" + pulse.IsEnabled + " ticks=" + diagnosticTicks);
+        App.Diagnostic?.Invoke("StartPause state=" + timer.State + " remaining=" + timer.RemainingSeconds + " editing=" + TimeEditor.IsEditing + " pulse=" + !closed + " ticks=" + diagnosticTicks);
     }
     private void Reset_Click(object sender, RoutedEventArgs e)
     {

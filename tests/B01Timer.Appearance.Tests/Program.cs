@@ -15,7 +15,7 @@ internal static class Program
         void Check(bool result, string name) { if (!result) throw new Exception(name); checks++; Console.WriteLine($"PASS {name}"); }
         string folder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "b01-appearance-" + Guid.NewGuid().ToString("N"));
         typeof(App).GetField("Diagnostic", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!.SetValue(null, new Action<string>(Console.WriteLine));
-        var app = new App(); app.InitializeComponent(); ThemeManager.Apply("dark");
+        var app = new TestApp(); app.InitializeComponent(); ThemeManager.Apply("dark");
         var window = new MainWindow(new AppSettings { LastSeconds = 900 }, new SettingsStore(folder));
         try
         {
@@ -71,8 +71,8 @@ internal static class Program
                 Environment.Exit(1);
             }, null, 10000, System.Threading.Timeout.Infinite);
             var frame = new System.Windows.Threading.DispatcherFrame();
-            var wait = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.Send) { Interval = TimeSpan.FromMilliseconds(1250) };
-            wait.Tick += (_, _) => { wait.Stop(); frame.Continue = false; }; wait.Start(); Console.WriteLine("TRACE entering WPF frame"); System.Windows.Threading.Dispatcher.PushFrame(frame); Console.WriteLine("TRACE exited WPF frame");
+            using var wait = new System.Threading.Timer(_ => window.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Send, new Action(() => frame.Continue = false)), null, 1250, System.Threading.Timeout.Infinite);
+            Console.WriteLine("TRACE entering WPF frame"); System.Windows.Threading.Dispatcher.PushFrame(frame); Console.WriteLine("TRACE exited WPF frame");
             Check(((TextBlock)window.FindName("RecordSeconds")).Text == "59", "Live countdown clock advances while editable inputs remain separate");
             ((Button)window.FindName("RecordTab")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); window.UpdateLayout();
             Check(start.Visibility == Visibility.Collapsed && reset.Visibility == Visibility.Visible, "Record has only the Reset action");
@@ -95,4 +95,11 @@ internal static class Program
             foreach (var descendant in Descendants(child)) yield return descendant;
         }
     }
+}
+
+internal sealed class TestApp : App
+{
+    // App startup is queued even when tests manually pump the dispatcher.
+    // The fixture supplies its own window and isolated SettingsStore.
+    protected override void OnStartup(StartupEventArgs e) { }
 }
