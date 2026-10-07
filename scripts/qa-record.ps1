@@ -164,7 +164,7 @@ public static class RecordProbe {
     Check ((Display-Time) -ne '00:00:00' -and (Record-Ticks 1) -gt $before) 'Record keeps accumulating across both tabs'
     Screenshot 'record-two-programs'
     Stop-App; $savedA = Record-Ticks 1; $savedB = Record-Ticks 2
-    Start-Sleep -Milliseconds 1200; Start-App; Invoke 'RecordTab'
+    Focus-Probe 2; Start-Sleep -Milliseconds 1200; Start-App; Invoke 'RecordTab'
     Check ((Record-Ticks 1) -eq $savedA -and (Record-Ticks 2) -eq $savedB) 'Restart retains both totals without offline time'
     Check ((Control 'RecordChip_0').Current.Name -eq 'Work A' -and (Control 'RecordChip_1').Current.Name -eq 'Work B') 'Restart restores program registrations'
     $probe = $probes[1]; $probe.CloseMainWindow() | Out-Null; $probe.WaitForExit(3000) | Out-Null; $probe.Dispose()

@@ -24,7 +24,7 @@ public partial class DurationEditor : UserControl
     public double NumberSize { get; set; } = 60;
     public double FieldWidth { get; set; } = 92;
     public string AutomationPrefix { get; set; } = "";
-    public int Seconds { get => seconds; set { seconds = value; if (!IsEditing) UpdateFields(); } }
+    public int Seconds { get => seconds; set { if (seconds == value) return; seconds = value; if (!IsEditing) UpdateFields(); } }
 
     public DurationEditor()
     {

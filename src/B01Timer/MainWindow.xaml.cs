@@ -27,6 +27,7 @@ public partial class MainWindow : Window
     private decimal savedTotalTicks;
     private int diagnosticTicks;
     private string validation = "";
+    private string statusBrush = "";
     private bool initialized;
 
     public MainWindow(AppSettings settings, SettingsStore store)
@@ -108,14 +109,19 @@ public partial class MainWindow : Window
             bool active = record is not null && string.Equals(record.ExecutablePath, recorder.ForegroundPath, StringComparison.OrdinalIgnoreCase);
             StatusDot.Visibility = active && validation.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
             StatusText.Text = validation.Length > 0 ? validation : record is null ? "Add a program to track" : active ? "Recording · " + record.Title : "Waiting for focus · " + record.Title;
-            StatusText.SetResourceReference(TextBlock.ForegroundProperty, validation.Length > 0 ? "ErrorBrush" : "MutedBrush");
+            SetStatusBrush(validation.Length > 0 ? "ErrorBrush" : "MutedBrush");
             ResetButton.IsEnabled = record is not null;
             return;
         }
         ResetButton.IsEnabled = true;
         StatusDot.Visibility = running && validation.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
         StatusText.Text = validation.Length > 0 ? validation : timer.State switch { CountdownState.Running => "Running", CountdownState.Paused => "Paused", CountdownState.Finished => "Time’s up", _ => "Ready" };
-        StatusText.SetResourceReference(TextBlock.ForegroundProperty, validation.Length > 0 ? "ErrorBrush" : timer.State == CountdownState.Finished ? "AccentBrush" : "MutedBrush");
+        SetStatusBrush(validation.Length > 0 ? "ErrorBrush" : timer.State == CountdownState.Finished ? "AccentBrush" : "MutedBrush");
+    }
+    private void SetStatusBrush(string brush)
+    {
+        if (statusBrush == brush) return;
+        statusBrush = brush; StatusText.SetResourceReference(TextBlock.ForegroundProperty, brush);
     }
     private void StartPause_Click(object sender, RoutedEventArgs e)
     {
