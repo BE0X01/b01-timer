@@ -50,6 +50,10 @@ internal static class Program
             Check(pause.FillContains(new Point(6, 12)) && pause.FillContains(new Point(18, 12)) && !pause.FillContains(new Point(12, 12)), "Running timer displays two filled Pause bars");
             window.UpdateLayout();
             Check(Math.Abs(RenderedSize(play) - RenderedSize(glyph)) < 0.05 && (IconCenter(play) - start.TransformToAncestor(window).Transform(new Point(start.ActualWidth / 2, start.ActualHeight / 2))).Length < 0.05, "Filled Pause matches Reset size and is centered");
+            var frame = new System.Windows.Threading.DispatcherFrame();
+            var wait = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1250) };
+            wait.Tick += (_, _) => { wait.Stop(); frame.Continue = false; }; wait.Start(); System.Windows.Threading.Dispatcher.PushFrame(frame);
+            Check(((DurationEditor)window.FindName("TimeEditor")).Seconds < 900, "Timer refresh pulse advances with the native foreground hook installed");
             ((Button)window.FindName("RecordTab")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); window.UpdateLayout();
             Check(start.Visibility == Visibility.Collapsed && reset.Visibility == Visibility.Visible, "Record has only the Reset action");
             var recordPanel = (Grid)window.FindName("RecordDisplay"); var badge = (TextBlock)window.FindName("RecordDays"); var hours = (TextBlock)window.FindName("RecordHours");

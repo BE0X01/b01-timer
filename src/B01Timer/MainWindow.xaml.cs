@@ -59,7 +59,7 @@ public partial class MainWindow : Window
             App.Diagnostic?.Invoke("Loaded start");
             SaveSettings(); initialized = true; SetDwmAppearance(); RenderPresets(); RenderRecords(); UpdateThemeButton(); UpdateDisplay();
             App.Diagnostic?.Invoke("foreground construction");
-            foreground = new(); App.Diagnostic?.Invoke("foreground created"); foreground.Changed += path => recorder.SetForeground(path); foreground.Sample(); pulse.Start();
+            pulse.Start(); foreground = new(); App.Diagnostic?.Invoke("foreground created"); foreground.Changed += path => recorder.SetForeground(path); foreground.Sample();
             App.Diagnostic?.Invoke("Loaded end pulse=" + pulse.IsEnabled);
         };
         Closed += (_, _) => { pulse.Stop(); recorder.SetForeground(null); foreground?.Dispose(); alarm.Dispose(); SaveSettings(); };

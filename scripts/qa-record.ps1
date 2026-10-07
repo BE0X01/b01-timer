@@ -21,9 +21,9 @@ $results = [System.Collections.Generic.List[object]]::new()
 $probes = [System.Collections.Generic.List[object]]::new()
 $app = $null
 $main = $null
-function Wait-For([scriptblock]$Probe, [int]$Timeout = 10000) {
+function Wait-For([scriptblock]$Condition, [int]$Timeout = 10000) {
     $watch = [Diagnostics.Stopwatch]::StartNew()
-    do { $value = & $Probe; if ($null -ne $value -and $value -ne $false) { return $value }; Start-Sleep -Milliseconds 100 } while ($watch.ElapsedMilliseconds -lt $Timeout)
+    do { $value = & $Condition; if ($null -ne $value -and $value -ne $false) { return $value }; Start-Sleep -Milliseconds 100 } while ($watch.ElapsedMilliseconds -lt $Timeout)
     throw 'Record UI wait timed out.'
 }
 function Check([bool]$Pass, [string]$Name) {
@@ -123,11 +123,15 @@ public static class RecordProbe {
     Start-Sleep -Milliseconds 300
     $paused = Display-Time; Start-Sleep -Milliseconds 1500
     Check ((Display-Time) -eq $paused) 'Own app focus excludes time'
+    Focus-Probe 2; $unchanged = Display-Time; Start-Sleep -Milliseconds 1200
+    Check ((Display-Time) -eq $unchanged) 'Unregistered program focus excludes time'
+    [RecordNative]::SetForegroundWindow([IntPtr]$main.Current.NativeWindowHandle) | Out-Null
     Invoke 'ResetButton'
     Check ((Display-Time) -eq '00:00:00') 'Record reset returns the selected record to zero'
     Invoke 'RecordChip_0'; Check ((Display-Time) -ne '00:00:00') 'Reset retains other program totals'
     # Countdown continues while Record is displayed; records also run on Timer tab.
     Invoke 'TimerTab'
+    [RecordNative]::SetForegroundWindow([IntPtr]$main.Current.NativeWindowHandle) | Out-Null
     $input = Control 'SecondsInput'; $input.SetFocus(); [Windows.Forms.SendKeys]::SendWait('^a30{ENTER}'); Invoke 'StartPauseButton'
     Invoke 'RecordTab'; $before = Record-Ticks 1; Focus-Probe 0; Start-Sleep -Milliseconds 1500
     Invoke 'TimerTab'
