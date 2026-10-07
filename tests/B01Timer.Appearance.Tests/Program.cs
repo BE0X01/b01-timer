@@ -15,7 +15,10 @@ internal static class Program
         void Check(bool result, string name) { if (!result) throw new Exception(name); checks++; Console.WriteLine($"PASS {name}"); }
         string folder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "b01-appearance-" + Guid.NewGuid().ToString("N"));
         typeof(App).GetField("Diagnostic", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!.SetValue(null, new Action<string>(Console.WriteLine));
-        var app = new TestApp(); app.InitializeComponent(); ThemeManager.Apply("dark");
+        var app = new TestApp();
+        app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/B01Timer;component/Styles.xaml") });
+        app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/B01Timer;component/Icons.xaml") });
+        ThemeManager.Apply("dark");
         var window = new MainWindow(new AppSettings { LastSeconds = 900 }, new SettingsStore(folder));
         try
         {
@@ -97,7 +100,7 @@ internal static class Program
     }
 }
 
-internal sealed class TestApp : App
+internal sealed class TestApp : Application
 {
     // App startup is queued even when tests manually pump the dispatcher.
     // The fixture supplies its own window and isolated SettingsStore.
