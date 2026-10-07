@@ -201,7 +201,7 @@ try {
     $overrideIni = Join-Path $script:SettingsDirectory 'B01Timer.ini'
     Wait-Result { Test-Path $overrideIni } | Out-Null
     Check (Test-Path $overrideIni) 'Settings override creates B01Timer.ini in the requested test folder'
-    Check (-not (Get-Control 'RecordTab').Current.IsEnabled) 'Record is disabled'
+    Check ((Get-Control 'RecordTab').Current.IsEnabled) 'Record is enabled'
     Set-Time '000000'
     Check (-not (Get-Control 'StartPauseButton').Current.IsEnabled) 'Zero seconds cannot start'
     Enter-Field 'MinutesInput' '20' $script:Main ''

@@ -94,4 +94,45 @@ Check(beeps.Count == 6 && beeps[3].start - beeps[2].end >= 30
     && beeps[4].start - beeps[3].end < 15 && beeps[5].start - beeps[4].end < 15, "Completion sound plays two separated three-beep phrases");
 Check(beeps.Count == 6 && beeps[2].end - beeps[2].start > beeps[0].end - beeps[0].start
     && beeps[5].end - beeps[5].start > beeps[3].end - beeps[3].start, "Each phrase ends with a longer final beep");
+// Foreground recording uses a fake awake clock so boundary checks are exact.
+long ticks = 0;
+var work = new AppSettings { Records = [new() { Id = "a", Title = "작업 = A", ExecutablePath = @"C:\Tools\A.exe" }, new() { Id = "b", Title = "B", ExecutablePath = @"C:\Tools\B.exe" }] };
+var recorder = new FocusRecorder(work, () => ticks);
+ticks += 5 * TimeSpan.TicksPerSecond; recorder.Tick();
+Check(work.Records.All(r => r.ElapsedTicks == 0), "Unregistered or absent foreground does not accrue time");
+recorder.SetForeground(@"c:\tools\a.EXE"); ticks += 4_500_000; recorder.SetForeground(@"C:\Tools\B.exe");
+ticks += 7_500_000; recorder.SetForeground(@"C:\Tools\A.exe"); ticks += 6_000_000; recorder.Tick();
+Check(work.Records[0].ElapsedTicks == 10_500_000 && work.Records[1].ElapsedTicks == 7_500_000, "Focus switches attribute subsecond time to the matching executable, ignoring case");
+work.SelectedRecordId = "b"; ticks += TimeSpan.TicksPerSecond; recorder.Tick();
+Check(work.Records[0].ElapsedTicks == 20_500_000 && work.Records[1].ElapsedTicks == 7_500_000, "Changing the displayed record does not disable another program");
+recorder.SetForeground(null); long before = work.Records[0].ElapsedTicks; ticks += 500 * TimeSpan.TicksPerSecond; recorder.Tick();
+Check(work.Records[0].ElapsedTicks == before, "App focus, session lock and untracked foreground exclude their intervals");
+recorder.Reset("b");
+Check(work.Records[1].ElapsedTicks == 0 && work.Records[0].ElapsedTicks == before, "Reset affects only the selected record");
+Check(RecordDuration.FromTicks(86399 * TimeSpan.TicksPerSecond) == new RecordDuration("23:59:59", ""), "Record displays the last second of day zero");
+Check(RecordDuration.FromTicks(86400 * TimeSpan.TicksPerSecond) == new RecordDuration("00:00:00", "1d"), "24 hours wraps the clock and shows 1d");
+Check(RecordDuration.FromTicks(7 * 86400 * TimeSpan.TicksPerSecond - 1) == new RecordDuration("23:59:59", "6d"), "Last fraction of the sixth day remains 6d");
+Check(RecordDuration.FromTicks(7 * 86400 * TimeSpan.TicksPerSecond) == new RecordDuration("00:00:00", "1w"), "Seven days becomes 1w");
+Check(RecordDuration.FromTicks((8 * 86400L + 3661) * TimeSpan.TicksPerSecond) == new RecordDuration("01:01:01", "1w 1d"), "Weeks, remaining days and hh:mm:ss coexist");
+Check(RecordDuration.FromTicks(long.MaxValue).Time.Length == 8 && RecordDuration.FromTicks(-1) == new RecordDuration("00:00:00", ""), "Very large and negative record durations format safely");
+string recordDirectory = Path.Combine(Path.GetTempPath(), "b01-record-" + Guid.NewGuid().ToString("N"));
+try
+{
+    var store = new SettingsStore(recordDirectory); store.Save(work); var loaded = store.Load();
+    Check(loaded.Records.Count == 2 && loaded.Records[0].Title == "작업 = A" && loaded.Records[0].ExecutablePath == work.Records[0].ExecutablePath && loaded.Records[0].ElapsedTicks == before && loaded.SelectedRecordId == "b", "INI preserves Unicode title, executable path, fractions and selected record");
+    long restartTicks = 0; var restarted = new FocusRecorder(loaded, () => restartTicks);
+    restartTicks += 100 * TimeSpan.TicksPerSecond; restarted.SetForeground(loaded.Records[0].ExecutablePath); restartTicks += TimeSpan.TicksPerSecond; restarted.Tick();
+    Check(loaded.Records[0].ElapsedTicks == before + TimeSpan.TicksPerSecond, "Relaunch preserves totals and does not add offline time");
+    loaded.Records = Enumerable.Range(0, 7).Select(i => new ProgramRecord { Id = i.ToString(), Title = "Program " + i, ExecutablePath = @"C:\" + i + ".exe", ElapsedTicks = i == 0 ? -1 : 0 }).ToList();
+    store.Save(loaded); loaded = store.Load();
+    Check(loaded.Records.Count == 5 && loaded.Records[0].ElapsedTicks == 0, "Persistence enforces the five-program limit and sanitizes negative durations");
+    loaded.Records[1].ExecutablePath = loaded.Records[0].ExecutablePath.ToUpperInvariant(); loaded.Records[2].Title = "bad\nsection"; store.Save(loaded);
+    Check(store.Load().Records.Count == 3, "Duplicate executables and INI line injection are rejected");
+    loaded.Records.Clear(); store.Save(loaded);
+    Check(store.Load().Records.Count == 0 && store.Load().SelectedRecordId == "", "Removing every program persists an empty record list");
+    Check(Directory.GetFiles(recordDirectory, "*.tmp-*").Length == 0, "Periodic record saves leave no temporary files");
+}
+finally { Directory.Delete(recordDirectory, true); }
+work.Records[0].ElapsedTicks = long.MaxValue - 1; recorder.SetForeground(work.Records[0].ExecutablePath); ticks += TimeSpan.TicksPerSecond; recorder.Tick();
+Check(work.Records[0].ElapsedTicks == long.MaxValue, "Record accumulation saturates rather than overflowing");
 Console.WriteLine($"{checks} checks passed.");

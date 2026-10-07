@@ -26,7 +26,9 @@ Windows 64비트용 포터블 타이머예요. ZIP을 풀고 B01Timer.exe를 실
 - 완료 시 삐비빅 알림 두 번
 - EXE와 같은 폴더의 B01Timer.ini에 즐겨찾기·테마·마지막 설정 시간 저장
 - 기존 AppData JSON 설정이 있으면 처음 한 번 INI로 이전
-- Record는 준비 중이며 비활성 상태
+- Record: 실행 중인 프로그램 최대 5개 등록, 포커스된 시간 자동 누적
+- Record 누적 시간과 프로그램 목록을 INI에 보관 · 1d / 1w 1d 표시
+- 재생·일시정지·리셋 아이콘 크기 통일, 테마 토글 확대
 
 소스: [$Commit](https://github.com/$Repository/commit/$Commit)
 검증: [Windows 빌드 및 QA](https://github.com/$Repository/actions/runs/$env:GITHUB_RUN_ID)

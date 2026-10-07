@@ -44,6 +44,9 @@ jobs:
       - name: Verify actual Windows GUI
         shell: powershell
         run: ./scripts/qa-ui.ps1 -ExePath ./artifacts/publish/B01Timer.exe
+      - name: Verify foreground program recording
+        shell: powershell
+        run: ./scripts/qa-record.ps1 -ExePath ./artifacts/publish/B01Timer.exe
       - name: Package and check release files
         shell: pwsh
         env:
@@ -79,5 +82,5 @@ jobs:
           name: B01Timer-QA
           path: |
             artifacts/qa-ui/
-            !artifacts/qa-ui/portable/B01Timer.exe
+            !artifacts/qa-ui/**/*.exe
           if-no-files-found: warn

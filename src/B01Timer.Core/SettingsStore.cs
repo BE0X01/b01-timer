@@ -9,6 +9,8 @@ public sealed class AppSettings
 {
     public string Theme { get; set; } = "dark";
     public int LastSeconds { get; set; }
+    public string SelectedRecordId { get; set; } = "";
+    public List<ProgramRecord> Records { get; set; } = [];
     public List<Favorite> Favorites { get; set; } = [new(Guid.NewGuid().ToString("N"), 15 * 60), new(Guid.NewGuid().ToString("N"), 30 * 60), new(Guid.NewGuid().ToString("N"), 60 * 60)];
 }
 
@@ -33,6 +35,10 @@ public sealed class SettingsStore(string directory, string? legacyJsonPath = nul
         settings.Theme = string.Equals(settings.Theme, "light", StringComparison.OrdinalIgnoreCase) ? "light" : "dark";
         settings.LastSeconds = Math.Clamp(settings.LastSeconds, 0, DurationInput.MaximumSeconds);
         settings.Favorites = (settings.Favorites ?? []).Where(f => f is not null && ValidId(f.Id) && f.Seconds is > 0 and <= DurationInput.MaximumSeconds).DistinctBy(f => f.Id).ToList();
+        settings.Records = (settings.Records ?? []).Where(r => r is not null && ValidId(r.Id) && ValidId(r.Title) && ValidId(r.ExecutablePath))
+            .DistinctBy(r => r.Id).DistinctBy(r => r.ExecutablePath, StringComparer.OrdinalIgnoreCase).Take(5).ToList();
+        foreach (var record in settings.Records) { record.Title = record.Title.Trim(); record.ElapsedTicks = Math.Max(0, record.ElapsedTicks); }
+        if (!settings.Records.Any(r => r.Id == settings.SelectedRecordId)) settings.SelectedRecordId = settings.Records.FirstOrDefault()?.Id ?? "";
         return settings;
     }
 
@@ -72,6 +78,7 @@ public sealed class SettingsStore(string directory, string? legacyJsonPath = nul
         {
             if (values.TryGetValue("Theme", out string? theme)) settings.Theme = theme;
             if (values.TryGetValue("LastTime", out string? time) && TryTime(time, out int seconds)) settings.LastSeconds = seconds;
+            if (values.TryGetValue("SelectedRecordId", out string? selected)) settings.SelectedRecordId = selected;
         }
         bool explicitCount = sections.TryGetValue("Presets", out var presetValues) && presetValues.TryGetValue("Count", out _);
         int? count = null;
@@ -85,6 +92,15 @@ public sealed class SettingsStore(string directory, string? legacyJsonPath = nul
                 if (count is not null && preset.Index > count) continue;
                 if (preset.Value.TryGetValue("Id", out string? id) && ValidId(id) && preset.Value.TryGetValue("Time", out string? time) && TryTime(time, out int seconds) && seconds > 0) settings.Favorites.Add(new(id, seconds));
             }
+        }
+        int recordCount = sections.TryGetValue("Records", out var recordValues) && recordValues.TryGetValue("Count", out string? recordCountText)
+            && int.TryParse(recordCountText, NumberStyles.None, CultureInfo.InvariantCulture, out int parsedCount) ? Math.Clamp(parsedCount, 0, 5) : 5;
+        for (int i = 1; i <= recordCount; i++)
+        {
+            if (!sections.TryGetValue($"Record{i}", out var record)) continue;
+            if (!record.TryGetValue("Id", out string? id) || !record.TryGetValue("Title", out string? title) || !record.TryGetValue("ExecutablePath", out string? executable)) continue;
+            long elapsed = record.TryGetValue("ElapsedTicks", out string? ticks) && long.TryParse(ticks, NumberStyles.Integer, CultureInfo.InvariantCulture, out long parsedTicks) ? Math.Max(0, parsedTicks) : 0;
+            settings.Records.Add(new() { Id = id, Title = title, ExecutablePath = executable, ElapsedTicks = elapsed });
         }
         return Sanitize(settings);
     }
@@ -100,12 +116,19 @@ public sealed class SettingsStore(string directory, string? legacyJsonPath = nul
             using (var writer = new StreamWriter(stream, new UTF8Encoding(false)))
             {
                 writer.WriteLine("; B01 Timer portable settings. Times use hh:mm:ss.");
-                writer.WriteLine("[Settings]"); writer.WriteLine($"Theme={settings.Theme}"); writer.WriteLine($"LastTime={DurationInput.Format(settings.LastSeconds)}"); writer.WriteLine();
+                writer.WriteLine("[Settings]"); writer.WriteLine($"Theme={settings.Theme}"); writer.WriteLine($"LastTime={DurationInput.Format(settings.LastSeconds)}"); writer.WriteLine($"SelectedRecordId={settings.SelectedRecordId}"); writer.WriteLine();
                 writer.WriteLine("[Presets]"); writer.WriteLine($"Count={settings.Favorites.Count}");
                 for (int i = 0; i < settings.Favorites.Count; i++)
                 {
                     Favorite favorite = settings.Favorites[i];
                     writer.WriteLine(); writer.WriteLine($"[Preset{i + 1}]"); writer.WriteLine($"Id={favorite.Id}"); writer.WriteLine($"Time={DurationInput.Format(favorite.Seconds)}");
+                }
+                writer.WriteLine(); writer.WriteLine("[Records]"); writer.WriteLine($"Count={settings.Records.Count}");
+                for (int i = 0; i < settings.Records.Count; i++)
+                {
+                    var record = settings.Records[i];
+                    writer.WriteLine(); writer.WriteLine($"[Record{i + 1}]"); writer.WriteLine($"Id={record.Id}"); writer.WriteLine($"Title={record.Title}"); writer.WriteLine($"ExecutablePath={record.ExecutablePath}");
+                    writer.WriteLine($"ElapsedTicks={record.ElapsedTicks.ToString(CultureInfo.InvariantCulture)}");
                 }
                 writer.Flush(); stream.Flush(flushToDisk: true);
             }
