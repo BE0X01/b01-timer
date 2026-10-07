@@ -1,5 +1,4 @@
 using B01Timer.Core;
-using System.Media;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Automation;
@@ -19,6 +18,7 @@ public partial class MainWindow : Window
     private readonly AppSettings settings;
     private readonly SettingsStore store;
     private readonly DispatcherTimer pulse = new() { Interval = TimeSpan.FromMilliseconds(50) };
+    private readonly CompletionAlarm alarm = new();
     private string validation = "";
     private bool initialized;
 
@@ -26,20 +26,27 @@ public partial class MainWindow : Window
     {
         this.settings = settings; this.store = store;
         InitializeComponent();
+        // Path's natural layout includes the space before its first coordinate.
+        // Center the ink bounds within a fixed 24px icon canvas instead.
+        var resetGeometry = ((Geometry)FindResource("IconRestart")).Clone();
+        Rect ink = resetGeometry.Bounds;
+        resetGeometry.Transform = new TranslateTransform(12 - ink.Left - ink.Width / 2, 12 - ink.Top - ink.Height / 2);
+        ResetIcon.Data = resetGeometry;
         timer.Configure(settings.LastSeconds);
         TimeEditor.Seconds = timer.DisplaySeconds;
         TimeEditor.EditingStarted += () => { timer.Pause(); UpdateDisplay(); };
         TimeEditor.DurationChanged += ConfigureTime;
         TimeEditor.ValidationChanged += message => { validation = message; UpdateDisplay(); };
-        pulse.Tick += (_, _) => { if (timer.Tick()) { SystemSounds.Asterisk.Play(); FlashWindow(new WindowInteropHelper(this).Handle, false); } UpdateDisplay(); };
+        pulse.Tick += (_, _) => { if (timer.Tick()) { alarm.Play(); FlashWindow(new WindowInteropHelper(this).Handle, false); } UpdateDisplay(); };
         Loaded += (_, _) => { SaveSettings(); initialized = true; SetDwmAppearance(); RenderPresets(); UpdateThemeButton(); UpdateDisplay(); pulse.Start(); };
-        Closed += (_, _) => { pulse.Stop(); SaveSettings(); };
+        Closed += (_, _) => { pulse.Stop(); alarm.Dispose(); SaveSettings(); };
         StateChanged += (_, _) => MaximizeButton.ToolTip = WindowState == WindowState.Maximized ? "Restore" : "Maximize";
         PreviewKeyDown += Window_PreviewKeyDown;
     }
 
     private void ConfigureTime(int seconds)
     {
+        alarm.Stop();
         timer.Configure(seconds); settings.LastSeconds = seconds; validation = ""; TimeEditor.ClearValidation();
         SaveSettings(); RenderPresets(); UpdateDisplay();
     }
@@ -63,10 +70,11 @@ public partial class MainWindow : Window
     private void StartPause_Click(object sender, RoutedEventArgs e)
     {
         if (!TimeEditor.Commit()) return;
+        alarm.Stop();
         if (timer.State == CountdownState.Running) timer.Pause(); else timer.Start();
         validation = ""; UpdateDisplay();
     }
-    private void Reset_Click(object sender, RoutedEventArgs e) { TimeEditor.Commit(); timer.Reset(); TimeEditor.ClearValidation(); validation = ""; UpdateDisplay(); }
+    private void Reset_Click(object sender, RoutedEventArgs e) { alarm.Stop(); TimeEditor.Commit(); timer.Reset(); TimeEditor.ClearValidation(); validation = ""; UpdateDisplay(); }
     private void Theme_Click(object sender, RoutedEventArgs e)
     {
         settings.Theme = settings.Theme == "dark" ? "light" : "dark"; ThemeManager.Apply(settings.Theme); SaveSettings(); UpdateThemeButton(); SetDwmAppearance();
@@ -87,7 +95,6 @@ public partial class MainWindow : Window
             var chip = new Button { Content = DurationInput.Format(favorite.Seconds), Height = 32, Padding = new Thickness(12, 0, 12, 0), Margin = new Thickness(0, 0, 8, 0), Style = (Style)FindResource("ButtonBase") };
             AutomationProperties.SetAutomationId(chip, $"PresetChip_{i}"); AutomationProperties.SetName(chip, DurationInput.Format(favorite.Seconds));
             chip.ToolTip = "Set timer · Right-click to edit or remove";
-            if (favorite.Seconds == timer.InitialSeconds) { chip.SetResourceReference(Button.BackgroundProperty, "SelectedBrush"); chip.SetResourceReference(Button.ForegroundProperty, "AccentBrush"); }
             chip.Click += (_, _) => { Keyboard.ClearFocus(); ConfigureTime(favorite.Seconds); };
             var menu = new ContextMenu();
             var edit = new MenuItem { Header = "Edit" }; edit.Click += (_, _) => OpenPreset(favorite);

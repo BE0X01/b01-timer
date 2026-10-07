@@ -20,5 +20,6 @@
   <ItemGroup>
     <ProjectReference Include="../B01Timer.Core/B01Timer.Core.csproj" />
     <Resource Include="Assets/timer.ico" />
+    <Resource Include="Assets/Fonts/*.otf" />
   </ItemGroup>
 </Project>

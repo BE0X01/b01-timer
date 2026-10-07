@@ -21,7 +21,9 @@ Windows 64비트용 포터블 타이머예요. ZIP을 풀고 B01Timer.exe를 실
 
 - hh:mm:ss 입력, 실행·일시정지·리셋
 - 즐겨찾기 시간 추가·수정·삭제
-- Dark/Light 테마
+- Dark/Light 테마 · EXE에 내장된 Pretendard 폰트
+- 중심 정렬된 Reset, 채워진 Pause 아이콘, Idle/Hover 버튼 상태
+- 완료 시 삐비빅 알림 두 번
 - EXE와 같은 폴더의 B01Timer.ini에 즐겨찾기·테마·마지막 설정 시간 저장
 - 기존 AppData JSON 설정이 있으면 처음 한 번 INI로 이전
 - Record는 준비 중이며 비활성 상태
@@ -41,8 +43,8 @@ if ($exists) {
     # The version represents its latest successfully verified build.
     Invoke-ReleaseGh @('api', "repos/$Repository/git/refs/tags/$tag", '--method', 'PATCH', '-f', "sha=$Commit", '-F', 'force=true')
     Invoke-ReleaseGh (@('release', 'upload', $tag, '--repo', $Repository, '--clobber') + $assets)
-    Invoke-ReleaseGh @('release', 'edit', $tag, '--repo', $Repository, '--title', "B01 Timer $Version", '--notes-file', $notesFile, '--latest')
+    Invoke-ReleaseGh @('release', 'edit', $tag, '--repo', $Repository, '--title', "Version $Version", '--notes-file', $notesFile, '--latest')
 } else {
-    Invoke-ReleaseGh (@('release', 'create', $tag, '--repo', $Repository, '--target', $Commit, '--title', "B01 Timer $Version", '--notes-file', $notesFile, '--latest') + $assets)
+    Invoke-ReleaseGh (@('release', 'create', $tag, '--repo', $Repository, '--target', $Commit, '--title', "Version $Version", '--notes-file', $notesFile, '--latest') + $assets)
 }
 Invoke-ReleaseGh @('release', 'view', $tag, '--repo', $Repository, '--json', 'url', '--jq', '.url')

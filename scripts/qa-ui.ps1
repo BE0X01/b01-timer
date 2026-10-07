@@ -399,6 +399,28 @@ try {
     Check-Time '00:00:00' 'Invalid INI time recovers safely on actual Windows launch'
     Check ((Get-Control 'ThemeButton').Current.Name -eq 'Switch to light theme') 'Invalid INI theme recovers to Dark'
     Check (@(Get-Presets).Count -eq 0) 'Invalid INI preset is discarded without crashing'
+    # Capture the actual EXE's filled Pause and its hover/pressed appearance.
+    Set-Time '000015'
+    Press-Button 'StartPauseButton'
+    Wait-Status 'Running'
+    $startButton = Get-Control 'StartPauseButton'
+    $startButton.SetFocus()
+    $mainRect = $script:Main.Current.BoundingRectangle
+    [QaNative]::SetCursorPos([int]($mainRect.X + 20), [int]($mainRect.Bottom - 25)) | Out-Null
+    Start-Sleep -Milliseconds 150
+    Capture-Window 'running-pause-idle'
+    $buttonRect = $startButton.Current.BoundingRectangle
+    [QaNative]::SetCursorPos([int]($buttonRect.X + $buttonRect.Width / 2), [int]($buttonRect.Y + $buttonRect.Height / 2)) | Out-Null
+    Start-Sleep -Milliseconds 120
+    Capture-Window 'button-hover'
+    [QaNative]::mouse_event(0x0002, 0, 0, 0, [UIntPtr]::Zero)
+    try { Start-Sleep -Milliseconds 120; Capture-Window 'button-pressed' }
+    finally { [QaNative]::mouse_event(0x0004, 0, 0, 0, [UIntPtr]::Zero) }
+    Wait-Status 'Paused'
+    [QaNative]::SetCursorPos([int]($mainRect.X + 20), [int]($mainRect.Bottom - 25)) | Out-Null
+    Start-Sleep -Milliseconds 120
+    Capture-Window 'paused-no-stroke'
+    Press-Button 'ResetButton'
     Write-Output "$($script:Results.Count) independent UI checks passed."
 } catch {
     $script:Results.Add([pscustomobject]@{ name = 'Unhandled test failure'; passed = $false; detail = $_.Exception.ToString() })

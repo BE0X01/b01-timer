@@ -3006,5 +3006,15 @@
       "I11:1094;11:534",
       "11:1096"
     ]
+  },
+  "implementationOverrides": {
+    "date": "2026-10-07",
+    "font": "Embedded Pretendard 1.3.9 Regular/SemiBold; tabular timer digits",
+    "buttons": "Idle/Hover; no pressed opacity or focus stroke; no selected preset appearance; disabled controls retained",
+    "pause": "Filled outer contours",
+    "reset": "Ink center normalized to (12,12) within 24px canvas",
+    "alarm": "Two three-beep phrases; stops on Reset/configure",
+    "figmaSync": "Pending; existing IDs/variants are the prior snapshot, not current implementation values",
+    "resumeScript": "Requires updating to current implementation before execution"
   }
 }

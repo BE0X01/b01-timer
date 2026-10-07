@@ -2,6 +2,12 @@
 
 [Figma 파일 열기](https://www.figma.com/design/F3jN688KWp9JsFV7JSqPs7) · Project 팀 · 디자인 기준 커밋 `a39ebf1`
 
+## 2026-10-07 앱 수정 이후의 차이
+
+현재 EXE는 Pretendard 1.3.9 Regular/SemiBold를 내장하고 숫자도 Pretendard tabular로 표시한다. 버튼은 Idle/Hover만 사용하며 Pressed opacity, Focus stroke 및 preset Selected 배경은 제거했다. Disabled는 Record와 0초 실행 불가를 위해 유지한다. Pause는 속이 채워진 두 막대, Reset은 실제 ink bounds를 중심으로 24px 캔버스에 배치한다. 완료음은 세 음 묶음을 두 번 재생한다.
+
+아래 Figma 구성과 기존 ID는 초기 스냅샷을 설명한다. 현재 파일에는 이전 글꼴·Pressed/Focus/Selected variants가 남아 있으며 MCP 한도로 Figma에서 갱신하지 못했다. 현재 코드의 위 수정 지침이 우선이다. 이전 상태를 코드에 되돌리지 않는다. 이어 실행할 스크립트도 초기 스냅샷 기준이므로 최신 토큰과 버튼 계약에 맞춰 수정한 뒤 사용해야 한다.
+
 ## 완성한 범위
 
 실제 WPF 소스에 사용된 컬러, typography, 벡터 아이콘, 버튼과 시간 입력의 상태를 편집 가능한 변수·스타일·컴포넌트로 생성했다. 화면 전체를 캡처한 이미지 레이어는 사용하지 않았다.

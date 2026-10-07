@@ -72,4 +72,26 @@ try
     Check(Directory.GetFiles(directory, "*.tmp-*").Length == 0, "Atomic saves clean up temporary files");
 }
 finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
+// Decode the audio rather than trusting the construction pattern.
+byte[] alarm = CompletionTone.CreateWave();
+Check(System.Text.Encoding.ASCII.GetString(alarm, 0, 4) == "RIFF" && System.Text.Encoding.ASCII.GetString(alarm, 8, 8) == "WAVEfmt "
+    && BitConverter.ToInt32(alarm, 4) == alarm.Length - 8 && BitConverter.ToInt32(alarm, 40) == alarm.Length - 44, "Completion sound is a complete RIFF/WAVE file");
+int rate = BitConverter.ToInt32(alarm, 24);
+Check(rate == 44100 && BitConverter.ToInt16(alarm, 20) == 1 && BitConverter.ToInt16(alarm, 22) == 1 && BitConverter.ToInt16(alarm, 34) == 16, "Completion sound uses supported mono 16-bit PCM");
+// Group consecutive 10ms frames containing audible samples into individual beeps.
+var beeps = new List<(int start, int end)>();
+int startFrame = -1, frameSamples = rate / 100, totalFrames = (alarm.Length - 44) / 2 / frameSamples;
+for (int frame = 0; frame < totalFrames; frame++)
+{
+    bool audible = Enumerable.Range(0, frameSamples).Any(i => Math.Abs((int)BitConverter.ToInt16(alarm, 44 + 2 * (frame * frameSamples + i))) > 1000);
+    if (audible && startFrame < 0) startFrame = frame;
+    if (!audible && startFrame >= 0) { beeps.Add((startFrame, frame)); startFrame = -1; }
+}
+if (startFrame >= 0) beeps.Add((startFrame, totalFrames));
+Check(beeps.Count == 6, "Completion sound contains six audible beeps");
+Check(beeps.Count == 6 && beeps[3].start - beeps[2].end >= 30
+    && beeps[1].start - beeps[0].end < 15 && beeps[2].start - beeps[1].end < 15
+    && beeps[4].start - beeps[3].end < 15 && beeps[5].start - beeps[4].end < 15, "Completion sound plays two separated three-beep phrases");
+Check(beeps.Count == 6 && beeps[2].end - beeps[2].start > beeps[0].end - beeps[0].start
+    && beeps[5].end - beeps[5].start > beeps[3].end - beeps[3].start, "Each phrase ends with a longer final beep");
 Console.WriteLine($"{checks} checks passed.");
