@@ -1,6 +1,34 @@
 # B01 Timer QA 보고서
 
-## Version 0.2 시간표시 수정 검증
+## Version 0.3 검증
+
+검증일: 2026-10-07. 소스 [93ed9a672fba5500b462e54680df2c7bb41910e3](https://github.com/BE0X01/b01-timer/commit/93ed9a672fba5500b462e54680df2c7bb41910e3)를 [Actions 실행 37590206218](https://github.com/BE0X01/b01-timer/actions/runs/37590206218)에서 빌드·검증한 뒤 [Version 0.3](https://github.com/BE0X01/b01-timer/releases/tag/v0.3)로 게시했어요. `v0.3` 태그의 commit은 검증 소스와 일치하고 실제 EXE FileVersion은 `0.3.0.0`이에요.
+
+| 구분 | 통과 |
+| --- | --- |
+| Core | 57개 |
+| 독립 QA Core | 39개 |
+| Windows WPF appearance | 31개 |
+| 실제 Timer GUI | 76개 |
+| 실제 Record GUI | 32개 |
+
+총 235개가 통과했고 실패는 0개예요. QA는 실행 로그와 실제 Timer/Record 결과 JSON, 내려받은 QA artifact의 digest·CRC를 독립 확인했어요.
+
+- 실행 중 시간·테마·즐겨찾기·Record 등록·선택·Reset·누적은 메모리에서만 갱신하고, 기존 INI의 bytes·hash·수정 시간이 바뀌지 않는 것을 확인했어요. 첫 실행과 legacy JSON 가져오기에서도 INI는 정상 종료 후에만 생성돼요.
+- 정상 종료 때 한 번 atomic save하고 다음 실행에서 설정과 기록을 복원해요. Enter 없이 남겨 둔 유효한 시간 입력도 종료 직전에 확정돼요. 강제 종료 후에는 이번 세션 변경 대신 직전 정상 종료 때 저장한 설정을 복원하는 것을 실제 EXE로 확인했어요.
+- 마지막 미처리 전경 구간 123.4567ms를 종료 때 정확히 정산해 저장하는 WPF 회귀가 통과했어요. 선택한 Record 삭제는 남은 첫 기록으로 즉시 전환하고, 선택하지 않은 삭제는 현재 선택을 유지하며, 마지막 기록 삭제는 선택을 비우고 Reset을 비활성화해요.
+- 기존 공통 clock의 7개 비편집·복귀 상태 RGBA 픽셀과 2자리 편집을 포함한 9개 숫자 ink bounds가 이번 빌드에서도 동일했어요. 클릭·Tab·Enter와 실행 중 숫자 클릭 일시정지, live countdown 회귀도 유지돼요.
+
+Release에는 [B01Timer-0.3-windows-x64.zip](https://github.com/BE0X01/b01-timer/releases/download/v0.3/B01Timer-0.3-windows-x64.zip) 하나를 게시했어요. 직접 다운로드한 ZIP은 61,545,383 bytes이며 모든 entry의 CRC와 정확한 세 파일(`B01Timer.exe`, `LICENSE`, `THIRD-PARTY-NOTICES.txt`)을 확인했어요. `SHA256SUMS.txt`는 ZIP에 없고, QA가 publish 폴더에 남겨 둔 checksum 파일도 압축에 포함되지 않았어요. 패키징 단계는 세 파일의 content hash를 각각 검사했고, 게시 ZIP의 EXE hash는 QA가 검증한 빌드 EXE와 일치하며 두 라이선스 내용도 소스와 일치해요. 외부 CI checksum artifact는 유지했어요.
+
+| 파일 | 확인한 SHA256 |
+| --- | --- |
+| B01Timer-0.3-windows-x64.zip | `9ce1bac0ad0421cba47f7387f842ee8f98a389ad3b85beb06a24fc4170ce2a22` |
+| B01Timer.exe | `7ca98950305979cd1f5dbee2f54d5db22d4e30f884330fd582b93c4bfdce2e9d` |
+
+UI 배치는 바꾸지 않았어요. 아래에 기록한 최대화 하단 버튼 가시성, 실제 절전·최대절전·세션 잠금, 스피커 청취, 150%/200% 화면 배율과 기존 Figma 갱신의 검증 한계는 유지해요.
+
+## 이전 Version 0.2 시간표시 수정 검증
 
 검증일: 2026-10-07. 소스 [5b804e3bdb4d2e2d458f4b7ff4a9aa20defef2b9](https://github.com/BE0X01/b01-timer/commit/5b804e3bdb4d2e2d458f4b7ff4a9aa20defef2b9)를 [Actions 실행 37586932079](https://github.com/BE0X01/b01-timer/actions/runs/37586932079)에서 빌드·검증한 뒤 기존 [Version 0.2](https://github.com/BE0X01/b01-timer/releases/tag/v0.2)와 ZIP을 수정본으로 갱신했어요. `v0.2` 태그는 이 검증 소스를 가리키고 EXE FileVersion은 `0.2.0.0`이에요.
 
